@@ -70,8 +70,20 @@ async function iniciar (lienzo) {
   }
 
   const suave = (x, y, k, dt) => x + (y - x) * (1 - Math.exp(-k * dt))
+  /* Fluidez (2026-10-19): si el robot no se ve (en Inicio, al bajar, el de la cabecera sale de la
+     pantalla), deja de dibujarse; así la GPU queda libre para el resto del panel. */
+  let visible = true
+  let pedido = 0
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting
+      if (visible && !pedido) { antes = performance.now(); pedido = requestAnimationFrame(cuadro) }
+    }).observe(lienzo)
+  }
   let antes = performance.now()
   function cuadro (ahora) {
+    pedido = 0
+    if (!visible) return
     const dt = Math.min((ahora - antes) / 1000, 1 / 30)
     antes = ahora
     a.t += dt
@@ -103,7 +115,7 @@ async function iniciar (lienzo) {
     cara.dibujar({ estado: 'neutral', mirar: { x: 0, y: 0 }, abre, voz: 0, t: a.t })
 
     render.render(escena, camara)
-    requestAnimationFrame(cuadro)
+    pedido = requestAnimationFrame(cuadro)
   }
-  requestAnimationFrame(cuadro)
+  pedido = requestAnimationFrame(cuadro)
 }

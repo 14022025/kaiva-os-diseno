@@ -321,3 +321,42 @@
 .k-v-proyectos .k-drive-form { display: flex; gap: 8px; align-items: center; }
 .k-v-proyectos .k-drive-form .k-in { height: 40px; font-size: 13.5px; padding: 0 14px; }
 .k-v-proyectos .k-drive-form .k-pild { flex: none; height: 40px; }
+/* Escala de títulos (2026-10-19) */
+.k-v-proyectos .k-recap h2 { font-size: 22px; line-height: 1.15; letter-spacing: -.03em; }
+.k-v-proyectos .k-proy h3 { font-size: 16px; line-height: 1.25; letter-spacing: -.02em; }
+
+/* ============================================================================
+   RONDA 3 (2026-10-19): la carpeta de cada cliente sin huecos.
+   ============================================================================ */
+/* Su sitio: las cuatro partes del índice en barras */
+.k-v-proyectos .k-pilares { display: grid; gap: 10px; margin-top: 16px; }
+.k-v-proyectos .k-pilar { display: grid; grid-template-columns: 84px minmax(0, 1fr) 28px; align-items: center; gap: 10px; font-size: 12.5px; }
+.k-v-proyectos .k-pilar span { color: #4E4E55; font-weight: 500; }
+.k-v-proyectos .k-pilar b { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.k-v-proyectos .k-pilar .k-barra { height: 6px; }
+
+/* Dinero: las tres cifras arriba y lo cobrado en una barra */
+.k-v-proyectos .k-tres { margin-top: 0; }
+.k-v-proyectos .k-tres b { font-size: 18px; }
+.k-v-proyectos .k-cobro { margin-top: auto; padding-top: 16px; display: grid; gap: 8px; }
+.k-v-proyectos .k-cobro .k-barra { height: 8px; }
+.k-v-proyectos .k-cobro small { font-size: 12.5px; color: #4E4E55; }
+.k-v-proyectos .k-cobro small b { color: #080808; font-weight: 600; }
+
+/* El Recap y su enlace, en una sola tarjeta negra baja */
+.k-v-proyectos .k-recap { padding: 22px 24px; gap: 28px; align-items: center; flex-wrap: wrap; }
+.k-v-proyectos .k-recap .k-recap-tit { margin: 0 0 6px; font-size: 18px; line-height: 1.2; letter-spacing: -.02em; }
+.k-v-proyectos .k-recap-txt p { margin: 0; font-size: 14px; color: rgba(251, 251, 251, .75); }
+.k-v-proyectos .k-recap .k-recap-nota { margin-top: 8px; font-size: 12.5px; color: rgba(251, 251, 251, .55); }
+.k-v-proyectos .k-recap .k-recap-nota b { color: #FFFFFF; }
+.k-v-proyectos .k-recap .k-recap-acc { flex: none; align-items: center; gap: 8px; }
+.k-v-proyectos .k-recap .k-ver { height: 42px; }
+.k-v-proyectos .k-pild--clara { box-shadow: inset 0 0 0 1.5px rgba(251, 251, 251, .35); color: #FFFFFF; }
+.k-v-proyectos .k-pild--clara:hover { background: #FFFFFF; color: #080808; }
+.k-v-proyectos .k-recap .k-recap-cambiar { margin: 0 0 0 6px; }
+.k-v-proyectos .k-recap .k-cambiar { color: rgba(251, 251, 251, .7); }
+.k-v-proyectos .k-recap .k-cambiar:hover { color: #FFFFFF; }
+@media (max-width: 760px) {
+  .k-v-proyectos .k-recap { flex-direction: column; align-items: stretch; }
+  .k-v-proyectos .k-recap .k-recap-acc { flex-wrap: wrap; }
+}

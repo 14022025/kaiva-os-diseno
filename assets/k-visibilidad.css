@@ -852,3 +852,5 @@ body.kv-os .k-v-ficha .os-grafica .kvg-marca circle { stroke: #FFFFFF; }
   .k-v-sitios .k-tabla .k-chip { white-space: normal; height: auto; min-height: 24px; padding-top: 3px; padding-bottom: 3px; }
   .k-v-sitios .k-tabla .c-est .k-dom-ext { width: auto; }
 }
+/* Escala de títulos (2026-10-19) */
+.k-v-ficha .k-vacio-t h2 { font-size: 22px; line-height: 1.15; }

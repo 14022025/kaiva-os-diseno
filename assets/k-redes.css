@@ -389,3 +389,6 @@ body.kv-os .k-v-redes .k-tabla td { border: 0; }
 .k-v-redes .k-seg--suave > [aria-current="page"] .n, .k-v-redes .k-seg--suave > .on .n { background: #F0F0F2; color: #080808; }
 /* panel.css da a toda <table> min-width: 420px: en el celular empujaba la página. */
 body.kv-os .k-v-redes .k-tabla { min-width: 0; }
+/* Escala de títulos (2026-10-19) */
+.k-v-redes .k-cifra--red { font-size: 28px; }
+.k-v-redes .k-vacio h3 { font-size: 16px; }

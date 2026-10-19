@@ -333,3 +333,15 @@ body.kv-os .kvr { --kvr-cursor: var(--k-cursor), auto; --kvr-mano: var(--k-curso
 @media (prefers-reduced-motion: reduce) { .kvr--previa .kvr-mini { transition: none; } }
 
 .kvr--previa.dos .kvr-mini:nth-child(3) { display: none; }
+
+/* Propuesta «más limpio» (2026-10-19): en la tarjeta de Inicio, cada pantalla
+   muestra solo lo esencial —qué es, la cifra y cuánto cambió—, sin la gráfica
+   de los 7 días ni los textos largos, y con la cifra más contenida. */
+.kvr--previa .kvr-mini { aspect-ratio: 340 / 300; min-height: 0; }
+.kvr--previa .kvr-abajo, .kvr--previa .kvr-texto, .kvr--previa .kvr-hueco { display: none !important; }
+.kvr--previa .kvr-grande { font-size: 76px; }
+.kvr--previa .kvr-grande small { font-size: 22px; margin-top: 12px; }
+.kvr.kvr--previa { align-items: start; }
+.kvr--previa .kvr-mini { aspect-ratio: 340 / 260; }
+.kvr--previa .kvr-grande { font-size: 58px; }
+.kvr--previa .kvr-grande small { font-size: 20px; }
