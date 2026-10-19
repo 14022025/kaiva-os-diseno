@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Redes · Kaiva OS</title>
+  <link rel="icon" href="assets/kaiva-k.png" type="image/png" sizes="192x192">
+  <!-- LA LETRA DEL SITIO NUEVO: GEIST.
+       Esto servía Inter e Inter Tight desde kaivastudio.com/assets/fonts para
+       no pedirle nada a Google detrás de un login. El sitio cambió de piel en
+       octubre de 2026 y ahora carga Geist y Geist Mono desde Google Fonts en
+       todas sus páginas; el panel hace lo mismo para que la letra sea la
+       misma. Es un panel interno del equipo: el argumento del consentimiento
+       (no conectar a terceros sin permiso del visitante) aquí no aplica.
+       Si algún día se quiere cero terceros, el cambio es copiar los dos
+       woff2 a public/assets/fonts y cambiar estas tres líneas. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+  <!-- El sistema visual. Se sirve desde NUESTRO origen, no desde el landing:
+       las fuentes de arriba sí pueden venir de kaivastudio.com porque una
+       fuente que tarda solo retrasa el intercambio de tipografía, pero una
+       hoja de estilos bloquea el pintado. Enlazar la del landing metería
+       GitHub Pages en la ruta crítica de arranque del panel, y si tarda, el
+       panel pinta sin colores.
+
+       public/assets/tokens.css es una copia byte a byte de
+       assets/tokens.css del landing. `php src/verificar-tokens.php` compara
+       las dos y falla si divergen; se corre antes de publicar. -->
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="assets/os.css">
+  <!-- CAMBIAR DE PESTAÑA SIN ESPERAR.
+       Al dejar el puntero un instante sobre un enlace del panel (todos
+       empiezan por "?": ?tab=crm, ?tab=finanzas…), el navegador prepara esa
+       página por detrás; al hacer clic ya está hecha y aparece al momento.
+       Solo enlaces internos que leen: nada de /api/ ni formularios. Chrome y
+       Edge lo hacen; los demás navegadores lo ignoran y cargan como siempre.
+       Las pestañas del menú se descargan apenas carga la página (prefetch:
+       solo el HTML, sin ejecutar nada): el servidor está lejos (≈ 85 ms de
+       ida y vuelta) y así el clic no espera a la red. -->
+  <script type="speculationrules">
+  {"prefetch": [{"where": {"selector_matches": ".k-riel a[href^='?']"}, "eagerness": "immediate"}],
+   "prerender": [{"where": {"selector_matches": "a[href^='?']:not([data-vista])"}, "eagerness": "moderate"}]}
+  </script>
+  <link rel="stylesheet" href="assets/panel.css">
+    <link rel="stylesheet" href="assets/k-base.css">
+    <link rel="stylesheet" href="assets/k-redes.css">
+  </head>
+
+<body class="kv-os">
+  <!-- LA PANTALLA DE ESPERA. Ver la nota larga del CSS (.scanner-overlay).
+       Lo que hay que mirar aquí es el marcado que le faltaba: role="dialog" +
+       aria-modal + tabindex="-1" para poder llevarle el foco, el Cancelar
+       visible desde el primer segundo, y el bloque de fallo con role="alert"
+       que sustituye a los dos alert() del navegador.
+       El título dice "Analizando", no "Ejecutando Auditoría Pro": el
+       vocabulario del producto tiene un verbo para esto y no es auditar. -->
+  <div class="scanner-overlay" id="scannerOverlay" role="dialog" aria-modal="true"
+       aria-labelledby="scanTitle" tabindex="-1" hidden>
+    <div class="scan-caja">
+      <img src="assets/kaiva-k.png" alt="" class="scan-robot float-robot">
+      <h2 class="scan-title" id="scanTitle">Analizando tu sitio</h2>
+
+      <div class="scan-progress-box" id="scanBarra">
+        <div class="scan-progress-bar"></div>
+      </div>
+
+      <p class="scan-status" id="scanStatus"></p>
+
+      <button type="button" class="scan-btn-sec" id="scanCancelar">Cancelar</button>
+
+      <div class="scan-fallo" id="scanFallo" role="alert" hidden>
+        <p class="scan-fallo-txt" id="scanFalloTxt"></p>
+        <div class="scan-fallo-acciones">
+          <button type="button" class="btn-chico" id="scanReintentar">Reintentar</button>
+          <button type="button" class="scan-btn-sec" id="scanCerrar">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <p id="kvAnuncio" class="kv-anuncio" role="status" aria-live="polite"></p>
+
+  <div class="tool-shell k-raiz">
+    <div class="k-marco">
+
+                <nav class="k-riel" aria-label="Secciones de Kaiva OS">
+          <a class="k-logo" href="inicio.html" aria-label="Kaiva OS, ir a Inicio">K<span class="k-tip">Kaiva OS</span></a>
+                      <a class="k-ico" href="inicio.html" aria-label="Inicio · 1 seguimiento para hoy o atrasado">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg>              <span class="k-badge k-badge-hoy" aria-hidden="true">1</span>              <span class="k-tip" aria-hidden="true">Inicio · 1 seguimiento para hoy o atrasado</span>
+            </a>
+                      <a class="k-ico" href="ventas.html" aria-label="Ventas · tablero, contactos y dinero">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>                            <span class="k-tip" aria-hidden="true">Ventas · tablero, contactos y dinero</span>
+            </a>
+                      <a class="k-ico" href="proyectos.html" aria-label="Proyectos · 1 entrega con la fecha pasada">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>              <span class="k-badge" aria-hidden="true">1</span>              <span class="k-tip" aria-hidden="true">Proyectos · 1 entrega con la fecha pasada</span>
+            </a>
+                      <a class="k-ico on" href="redes.html" aria-current="page" aria-label="Redes">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><path d="M17 7h.01"/></svg>                            <span class="k-tip" aria-hidden="true">Redes</span>
+            </a>
+                      <a class="k-ico" href="visibilidad.html" aria-label="Visibilidad · se cayó el permiso de Google">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>              <span class="k-badge" aria-hidden="true">!</span>              <span class="k-tip" aria-hidden="true">Visibilidad · se cayó el permiso de Google</span>
+            </a>
+                    <span class="k-sep" aria-hidden="true"></span>
+          <span class="k-empuja" aria-hidden="true"></span>
+          <a class="k-ico k-extra" href="https://kaivastudio.com/" target="_blank" rel="noopener" aria-label="Abrir kaivastudio.com">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c-3 3-3 14 0 17M12 3.5c3 3 3 14 0 17"/></svg>            <span class="k-tip" aria-hidden="true">kaivastudio.com ↗</span>
+          </a>
+
+                    <div class="k-cuenta" id="cuenta">
+            <button type="button" class="k-ico k-cuenta-btn" id="cuentaBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Tu cuenta">
+                            <span class="k-ini">K</span>
+              <span class="k-tip" aria-hidden="true">Tu cuenta</span>
+            </button>
+            <div class="k-cuenta-menu" id="cuentaMenu" role="menu" hidden>
+              <div class="k-cuenta-cab">
+                <b>Kaiva Studio</b>
+                <small>Google: hola@kaivastudio.com</small>
+              </div>
+                              <div class="k-cuenta-nota rota"><i></i>Se cayó el permiso de Google</div>
+                <a class="k-cuenta-item" role="menuitem" href="#">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v5h-5"/></svg>
+                  Volver a conectar                </a>
+                            <form method="post" action="#">
+                <button type="submit" class="k-cuenta-item" role="menuitem">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                  Cerrar sesión
+                </button>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Área de Contenido Principal -->
+        <main class="k-contenido">
+
+        
+                    
+                      <!-- Estás mirando un sitio que no es el tuyo.
+                 El aviso aparece por lo que ESTE informe es, no por cómo se
+                 llama el dominio: ver $esComparacion arriba. Y solo tiene
+                 sentido si hay a dónde volver, así que la salida se pinta
+                 únicamente cuando la persona tiene un sitio propio. -->
+            
+            
+                        
+            <!-- PESTAÑA: RESUMEN -->
+                                        
+<div class="k-v k-v-redes">
+
+<section class="k-banda" aria-label="Redes">
+  <div class="k-izq">
+    <h1 class="k-h1">Redes</h1>
+    <nav class="k-seg" aria-label="Secciones de Redes">
+              <a href="redes.html" aria-current="page">General</a>
+              <a href="redes.html" >Instagram</a>
+              <a href="redes.html" >LinkedIn</a>
+              <a href="redes.html" >Behance</a>
+          </nav>
+  </div>
+  <div class="k-acc">
+          <button type="button" class="k-pblanca" data-abre="dlg-anotar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><span>Anotar la semana</span></button>
+              <button type="button" class="k-negra" data-abre="dlg-pieza"><span>Programar publicación</span> <span class="k-flecha"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></button>
+      </div>
+</section>
+
+
+  <div class="k-aviso" role="note">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/></svg>    <span>Sin Analytics no se sabe cuántas visitas trajo cada pieza: la conexión está revocada.</span>
+    <a class="k-negra" href="#">Conectar Google</a>
+  </div>
+
+<div class="k-rejilla">
+  <!-- CÓMO VAS: tres frases en la tarjeta negra -->
+  <section class="k-t k-t--negra s12" aria-label="Cómo vas">
+    <div class="k-frases" style="--n:2">
+              <div class="k-frase k-frase--mal"><span class="k-mono">La meta de la semana</span><p>Esta semana llevas <b>0 de 2</b> publicaciones. Publicar seguido es lo que más hace crecer una cuenta.</p></div>
+              <div class="k-frase k-frase--neutro"><span class="k-mono">Lo próximo</span><p>«Caso de Estudio: Rebranding Kaiva Studio 2026», <b>hoy</b>. Y 5 más en estas dos semanas.</p></div>
+          </div>
+  </section>
+
+  <!-- LAS CUATRO CIFRAS -->
+  <div class="k-t s3">
+    <span class="k-cifra-et">Esta semana</span>
+    <div class="k-meta">
+      <svg width="58" height="58" viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="24" fill="none" stroke="#F0F0F2" stroke-width="6"/></svg>
+      <b>0<small>de 2 publicadas</small></b>
+    </div>
+    <span class="k-pie">La meta son 2 por semana</span>
+  </div>
+  <div class="k-t s3">
+    <span class="k-cifra-et">Seguidores</span>
+    <span class="k-cifra">3.272</span>
+    <span class="k-pie"><b>+21</b> desde la lectura anterior</span>
+  </div>
+  <div class="k-t s3">
+    <span class="k-cifra-et">Llegaron por redes · 90 días</span>
+          <span class="k-cifra">6<small>contactos</small></span>
+      <span class="k-pie">Las visitas necesitan Google conectado</span>
+      </div>
+  <div class="k-t s3">
+    <span class="k-cifra-et">Próximas 2 semanas</span>
+    <span class="k-cifra">6<small>programadas</small></span>
+    <span class="k-pie">La primera, <b>hoy</b></span>
+  </div>
+
+  <!-- LAS REDES, UNA TARJETA CADA UNA (Inicio enlaza aquí: #t-redes) -->
+      <a href="redes.html" class="k-t s3 k-red-t" id="t-redes" aria-label="Ver Instagram">
+      <span class="k-red-cab"><span class="k-red-ic"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span><span class="k-cifra-et">Instagram</span></span>
+      <span class="k-cifra k-cifra--red">1.332</span>
+      <span class="k-pie k-pie--fila">
+        <span>
+          Sin conectar
+                  </span>
+        <span class="k-circ k-circ--chico" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </span>
+    </a>
+      <a href="redes.html" class="k-t s3 k-red-t" aria-label="Ver LinkedIn · perfil">
+      <span class="k-red-cab"><span class="k-red-ic"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10.5V17M8 7.5v.01M12 17v-6.5M12 13.5a2.5 2.5 0 0 1 5 0V17"/></svg></span><span class="k-cifra-et">LinkedIn · perfil</span></span>
+      <span class="k-cifra k-cifra--red">1.620</span>
+      <span class="k-pie k-pie--fila">
+        <span>
+          +12 desde el 5 oct                  </span>
+        <span class="k-circ k-circ--chico" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </span>
+    </a>
+      <a href="redes.html" class="k-t s3 k-red-t" aria-label="Ver LinkedIn · página">
+      <span class="k-red-cab"><span class="k-red-ic"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10.5V17M8 7.5v.01M12 17v-6.5M12 13.5a2.5 2.5 0 0 1 5 0V17"/></svg></span><span class="k-cifra-et">LinkedIn · página</span></span>
+      <span class="k-cifra k-cifra--red">—</span>
+      <span class="k-pie k-pie--fila">
+        <span>
+          Sin anotar        </span>
+        <span class="k-circ k-circ--chico" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </span>
+    </a>
+      <a href="redes.html" class="k-t s3 k-red-t" aria-label="Ver Behance">
+      <span class="k-red-cab"><span class="k-red-ic"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5h5a2.75 2.75 0 0 1 0 5.5H3zM3 12h5.5a2.75 2.75 0 0 1 0 5.5H3zM14.5 7.5h5M14 14.5h7a3.5 3.5 0 1 0-1.1 2.5"/></svg></span><span class="k-cifra-et">Behance</span></span>
+      <span class="k-cifra k-cifra--red">320</span>
+      <span class="k-pie k-pie--fila">
+        <span>
+          +6 desde el 5 oct                  </span>
+        <span class="k-circ k-circ--chico" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </span>
+    </a>
+  
+  <!-- LAS PRÓXIMAS DOS SEMANAS -->
+  <section class="k-t s12" aria-labelledby="t-cal">
+    <div class="k-cab">
+      <div><h2 class="k-tit" id="t-cal">Las próximas dos semanas</h2><span class="k-sub">Toca un día vacío para programar ahí</span></div>
+      <div class="k-ley k-ley--cab"><span><i class="ig"></i>Instagram</span><span><i class="li"></i>LinkedIn</span><span><i class="be"></i>Behance</span></div>
+    </div>
+    <div class="k-cal">
+            <div class="k-semana">
+                  <div class="k-dia hoy lleno">
+            <div class="k-dia-cab"><span class="k-mono">lun</span><b>19</b></div>
+                          <button type="button" class="k-pz k-pz--produccion" title="Caso de Estudio: Rebranding Kaiva Studio 2026 · En producción" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:1,&quot;canal&quot;:&quot;behance&quot;,&quot;formato&quot;:&quot;Case Study&quot;,&quot;titulo&quot;:&quot;Caso de Estudio: Rebranding Kaiva Studio 2026&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}"><i class="be"></i><span>En producción<small>Caso de Estudio: Rebranding Kaiva Studio 2026</small></span></button>
+                          <button type="button" class="k-pz k-pz--produccion" title="Narrativa de Reposicionamiento y Arquitectura Web · En producción" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:2,&quot;canal&quot;:&quot;linkedin&quot;,&quot;formato&quot;:&quot;Artículo / Post&quot;,&quot;titulo&quot;:&quot;Narrativa de Reposicionamiento y Arquitectura Web&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}"><i class="li"></i><span>En producción<small>Narrativa de Reposicionamiento y Arquitectura Web</small></span></button>
+                          <button type="button" class="k-pz k-pz--produccion" title="Carrusel: Transformación Visual Antes vs Después · En producción" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:3,&quot;canal&quot;:&quot;instagram&quot;,&quot;formato&quot;:&quot;Carrusel Reel&quot;,&quot;titulo&quot;:&quot;Carrusel: Transformación Visual Antes vs Después&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}"><i class="ig"></i><span>En producción<small>Carrusel: Transformación Visual Antes vs Después</small></span></button>
+                          <button type="button" class="k-pz k-pz--planificado" title="Stickers de Enlace Directo en Stories · Planificada" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:4,&quot;canal&quot;:&quot;instagram&quot;,&quot;formato&quot;:&quot;Story Interactiva&quot;,&quot;titulo&quot;:&quot;Stickers de Enlace Directo en Stories&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}"><i class="ig"></i><span>Planificada<small>Stickers de Enlace Directo en Stories</small></span></button>
+                                  </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">mar</span><b>20</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-20" data-pre-estado="planificado" aria-label="Programar una pieza mañana"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">mié</span><b>21</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-21" data-pre-estado="planificado" aria-label="Programar una pieza el 21 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">jue</span><b>22</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-22" data-pre-estado="planificado" aria-label="Programar una pieza el 22 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia lleno">
+            <div class="k-dia-cab"><span class="k-mono">vie</span><b>23</b></div>
+                          <button type="button" class="k-pz k-pz--programado" title="5 errores de una web · Programada" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:5,&quot;canal&quot;:&quot;instagram&quot;,&quot;formato&quot;:&quot;carrusel&quot;,&quot;titulo&quot;:&quot;5 errores de una web&quot;,&quot;texto&quot;:&quot;Cinco errores que hacen que tu web no venda.&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-23&quot;,&quot;hora&quot;:&quot;18:00&quot;,&quot;publicar_auto&quot;:1}"><i class="ig"></i><span>18:00<small>5 errores de una web</small></span></button>
+                                  </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">sáb</span><b>24</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-24" data-pre-estado="planificado" aria-label="Programar una pieza el 24 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia lleno">
+            <div class="k-dia-cab"><span class="k-mono">dom</span><b>25</b></div>
+                          <button type="button" class="k-pz k-pz--planificado" title="Caso Ruta Viajes · Planificada" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:6,&quot;canal&quot;:&quot;linkedin&quot;,&quot;formato&quot;:&quot;post&quot;,&quot;titulo&quot;:&quot;Caso Ruta Viajes&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-25&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}"><i class="li"></i><span>Planificada<small>Caso Ruta Viajes</small></span></button>
+                                  </div>
+              </div>
+            <div class="k-semana">
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">lun</span><b>26</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-26" data-pre-estado="planificado" aria-label="Programar una pieza el 26 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">mar</span><b>27</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-27" data-pre-estado="planificado" aria-label="Programar una pieza el 27 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">mié</span><b>28</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-28" data-pre-estado="planificado" aria-label="Programar una pieza el 28 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">jue</span><b>29</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-29" data-pre-estado="planificado" aria-label="Programar una pieza el 29 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">vie</span><b>30</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-30" data-pre-estado="planificado" aria-label="Programar una pieza el 30 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">sáb</span><b>31</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-10-31" data-pre-estado="planificado" aria-label="Programar una pieza el 31 oct"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+                  <div class="k-dia">
+            <div class="k-dia-cab"><span class="k-mono">dom</span><b>1</b></div>
+                                      <button type="button" class="k-mas" data-abre="dlg-pieza" data-pre-fecha_publicacion="2026-11-01" data-pre-estado="planificado" aria-label="Programar una pieza el 1 nov"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="k-tip">Programar aquí</span></button>
+                      </div>
+              </div>
+          </div>
+  </section>
+</div>
+
+
+
+<div class="k-rejilla">
+  <section class="k-t s12" aria-labelledby="t-graf" data-vistas>
+    <div class="k-cab">
+      <h2 class="k-tit" id="t-graf">Visitas al sitio y piezas publicadas</h2>
+              <nav class="k-seg k-seg--suave" aria-label="Qué gráfica ver">
+                      <a href="redes.html" data-vista="visitas" aria-current="page">Visitas del sitio</a>
+                      <a href="redes.html" data-vista="alcance" >Alcance en Instagram</a>
+                      <a href="redes.html" data-vista="seguidores" >Seguidores en Instagram</a>
+                  </nav>
+          </div>
+                  <div class="k-graf" data-vista-panel="visitas" ><div class="os-grafica-caja"><svg class="os-grafica" viewBox="0 0 960 260" role="img" aria-label="Visitas por día"><line x1="44" x2="946" y1="230" y2="230" class="kvg-eje"/><text x="36" y="234" text-anchor="end" class="kvg-t">0</text><line x1="44" x2="946" y1="159.3" y2="159.3" class="kvg-eje"/><text x="36" y="163.3" text-anchor="end" class="kvg-t">50</text><line x1="44" x2="946" y1="88.7" y2="88.7" class="kvg-eje"/><text x="36" y="92.7" text-anchor="end" class="kvg-t">100</text><line x1="44" x2="946" y1="18" y2="18" class="kvg-eje"/><text x="36" y="22" text-anchor="end" class="kvg-t">150</text><rect class="kvg-barra" x="46.7" y="141" width="9.6" height="89" rx="3"><title>20 ago: 63 visitas</title></rect><text x="51.5" y="252" text-anchor="middle" class="kvg-t">20 ago</text><rect class="kvg-barra" x="61.7" y="155.1" width="9.6" height="74.9" rx="3"><title>21 ago: 53 visitas</title></rect><rect class="kvg-barra" x="76.8" y="146.6" width="9.6" height="83.4" rx="3"><title>22 ago: 59 visitas</title></rect><rect class="kvg-barra" x="91.8" y="126.8" width="9.6" height="103.2" rx="3"><title>23 ago: 73 visitas</title></rect><rect class="kvg-barra" x="106.8" y="155.1" width="9.6" height="74.9" rx="3"><title>24 ago: 53 visitas</title></rect><rect class="kvg-barra" x="121.9" y="152.3" width="9.6" height="77.7" rx="3"><title>25 ago: 55 visitas</title></rect><rect class="kvg-barra" x="136.9" y="143.8" width="9.6" height="86.2" rx="3"><title>26 ago: 61 visitas</title></rect><rect class="kvg-barra" x="151.9" y="150.9" width="9.6" height="79.1" rx="3"><title>27 ago: 56 visitas</title></rect><rect class="kvg-barra" x="167" y="143.8" width="9.6" height="86.2" rx="3"><title>28 ago: 61 visitas</title></rect><text x="171.8" y="252" text-anchor="middle" class="kvg-t">28 ago</text><rect class="kvg-barra" x="182" y="148" width="9.6" height="82" rx="3"><title>29 ago: 58 visitas</title></rect><rect class="kvg-barra" x="197" y="129.7" width="9.6" height="100.3" rx="3"><title>30 ago: 71 visitas</title></rect><rect class="kvg-barra" x="212.1" y="125.4" width="9.6" height="104.6" rx="3"><title>31 ago: 74 visitas</title></rect><rect class="kvg-barra" x="227.1" y="146.6" width="9.6" height="83.4" rx="3"><title>1 sep: 59 visitas</title></rect><rect class="kvg-barra" x="242.1" y="135.3" width="9.6" height="94.7" rx="3"><title>2 sep: 67 visitas</title></rect><rect class="kvg-barra" x="257.2" y="112.7" width="9.6" height="117.3" rx="3"><title>3 sep: 83 visitas</title></rect><rect class="kvg-barra" x="272.2" y="125.4" width="9.6" height="104.6" rx="3"><title>4 sep: 74 visitas</title></rect><rect class="kvg-barra" x="287.2" y="142.4" width="9.6" height="87.6" rx="3"><title>5 sep: 62 visitas</title></rect><text x="292.1" y="252" text-anchor="middle" class="kvg-t">5 sep</text><rect class="kvg-barra" x="302.3" y="145.2" width="9.6" height="84.8" rx="3"><title>6 sep: 60 visitas</title></rect><rect class="kvg-barra" x="317.3" y="146.6" width="9.6" height="83.4" rx="3"><title>7 sep: 59 visitas</title></rect><rect class="kvg-barra" x="332.3" y="126.8" width="9.6" height="103.2" rx="3"><title>8 sep: 73 visitas</title></rect><rect class="kvg-barra" x="347.4" y="129.7" width="9.6" height="100.3" rx="3"><title>9 sep: 71 visitas</title></rect><rect class="kvg-barra" x="362.4" y="124" width="9.6" height="106" rx="3"><title>10 sep: 75 visitas</title></rect><rect class="kvg-barra" x="377.4" y="124" width="9.6" height="106" rx="3"><title>11 sep: 75 visitas</title></rect><rect class="kvg-barra" x="392.5" y="122.6" width="9.6" height="107.4" rx="3"><title>12 sep: 76 visitas</title></rect><rect class="kvg-barra" x="407.5" y="128.2" width="9.6" height="101.8" rx="3"><title>13 sep: 72 visitas</title></rect><text x="412.3" y="252" text-anchor="middle" class="kvg-t">13 sep</text><rect class="kvg-barra" x="422.5" y="133.9" width="9.6" height="96.1" rx="3"><title>14 sep: 68 visitas</title></rect><rect class="kvg-barra" x="437.6" y="107" width="9.6" height="123" rx="3"><title>15 sep: 87 visitas</title></rect><rect class="kvg-barra" x="452.6" y="131.1" width="9.6" height="98.9" rx="3"><title>16 sep: 70 visitas</title></rect><rect class="kvg-barra" x="467.6" y="112.7" width="9.6" height="117.3" rx="3"><title>17 sep: 83 visitas</title></rect><rect class="kvg-barra" x="482.7" y="109.9" width="9.6" height="120.1" rx="3"><title>18 sep: 85 visitas</title></rect><rect class="kvg-barra" x="497.7" y="116.9" width="9.6" height="113.1" rx="3"><title>19 sep: 80 visitas</title></rect><rect class="kvg-barra" x="512.7" y="124" width="9.6" height="106" rx="3"><title>20 sep: 75 visitas</title></rect><rect class="kvg-barra" x="527.8" y="90.1" width="9.6" height="139.9" rx="3"><title>21 sep: 99 visitas</title></rect><text x="532.6" y="252" text-anchor="middle" class="kvg-t">21 sep</text><rect class="kvg-barra" x="542.8" y="83" width="9.6" height="147" rx="3"><title>22 sep: 104 visitas</title></rect><rect class="kvg-barra" x="557.8" y="104.2" width="9.6" height="125.8" rx="3"><title>23 sep: 89 visitas</title></rect><rect class="kvg-barra" x="572.9" y="101.4" width="9.6" height="128.6" rx="3"><title>24 sep: 91 visitas</title></rect><rect class="kvg-barra" x="587.9" y="88.7" width="9.6" height="141.3" rx="3"><title>25 sep: 100 visitas</title></rect><rect class="kvg-barra" x="602.9" y="88.7" width="9.6" height="141.3" rx="3"><title>26 sep: 100 visitas</title></rect><rect class="kvg-barra" x="618" y="73.1" width="9.6" height="156.9" rx="3"><title>27 sep: 111 visitas</title></rect><rect class="kvg-barra" x="633" y="112.7" width="9.6" height="117.3" rx="3"><title>28 sep: 83 visitas</title></rect><rect class="kvg-barra" x="648" y="100" width="9.6" height="130" rx="3"><title>29 sep: 92 visitas</title></rect><text x="652.9" y="252" text-anchor="middle" class="kvg-t">29 sep</text><rect class="kvg-barra" x="663.1" y="90.1" width="9.6" height="139.9" rx="3"><title>30 sep: 99 visitas</title></rect><rect class="kvg-barra" x="678.1" y="108.5" width="9.6" height="121.5" rx="3"><title>1 oct: 86 visitas</title></rect><rect class="kvg-barra" x="693.1" y="95.7" width="9.6" height="134.3" rx="3"><title>2 oct: 95 visitas</title></rect><rect class="kvg-barra" x="708.2" y="66.1" width="9.6" height="163.9" rx="3"><title>3 oct: 116 visitas</title></rect><rect class="kvg-barra" x="723.2" y="67.5" width="9.6" height="162.5" rx="3"><title>4 oct: 115 visitas</title></rect><rect class="kvg-barra" x="738.2" y="100" width="9.6" height="130" rx="3"><title>5 oct: 92 visitas</title></rect><rect class="kvg-barra" x="753.3" y="63.2" width="9.6" height="166.8" rx="3"><title>6 oct: 118 visitas</title></rect><rect class="kvg-barra" x="768.3" y="66.1" width="9.6" height="163.9" rx="3"><title>7 oct: 116 visitas</title></rect><text x="773.1" y="252" text-anchor="middle" class="kvg-t">7 oct</text><rect class="kvg-barra" x="783.3" y="61.8" width="9.6" height="168.2" rx="3"><title>8 oct: 119 visitas</title></rect><rect class="kvg-barra" x="798.4" y="60.4" width="9.6" height="169.6" rx="3"><title>9 oct: 120 visitas</title></rect><rect class="kvg-barra" x="813.4" y="56.2" width="9.6" height="173.8" rx="3"><title>10 oct: 123 visitas</title></rect><rect class="kvg-barra" x="828.4" y="66.1" width="9.6" height="163.9" rx="3"><title>11 oct: 116 visitas</title></rect><rect class="kvg-barra" x="843.5" y="73.1" width="9.6" height="156.9" rx="3"><title>12 oct: 111 visitas</title></rect><rect class="kvg-barra" x="858.5" y="47.7" width="9.6" height="182.3" rx="3"><title>13 oct: 129 visitas</title></rect><rect class="kvg-barra" x="873.5" y="53.3" width="9.6" height="176.7" rx="3"><title>14 oct: 125 visitas</title></rect><rect class="kvg-barra" x="888.6" y="81.6" width="9.6" height="148.4" rx="3"><title>15 oct: 105 visitas</title></rect><text x="893.4" y="252" text-anchor="middle" class="kvg-t">15 oct</text><rect class="kvg-barra" x="903.6" y="46.3" width="9.6" height="183.7" rx="3"><title>16 oct: 130 visitas</title></rect><rect class="kvg-barra" x="918.6" y="80.2" width="9.6" height="149.8" rx="3"><title>17 oct: 106 visitas</title></rect><rect class="kvg-barra" x="933.7" y="80.2" width="9.6" height="149.8" rx="3"><title>18 oct: 106 visitas</title></rect><polyline class="kvg-media" points="96.6,142.4 111.7,144.9 126.7,146.1 141.7,145.8 156.8,147.2 171.8,145.6 186.8,145.8 201.9,146.2 216.9,142 231.9,141.2 247,140 262,134.5 277,131.9 292.1,131.1 307.1,133.3 322.1,136.3 337.2,133.5 352.2,132.7 367.2,134.3 382.3,134.1 397.3,131.3 412.3,128.8 427.4,127 442.4,124.2 457.4,124.4 472.5,122.8 487.5,120.8 502.5,120 517.6,119.4 532.6,113.1 547.6,109.7 562.7,105.8 577.7,104.2 592.7,101.2 607.8,97.1 622.8,89.9 637.8,93.1 652.9,95.5 667.9,93.5 682.9,94.5 698,95.5 713,92.3 728,91.5 743.1,89.7 758.1,84.4 773.1,81 788.2,74.3 803.2,69.3 818.2,67.9 833.3,67.7 848.3,63.8 863.3,61.6 878.4,59.8 893.4,62.6 908.4,60.6 923.5,64 938.5,66.1"/><g class="kvg-marca"><line x1="878.4" x2="878.4" y1="18" y2="230" style="stroke:#7A3FC9"/><circle cx="878.4" cy="16" r="6" style="fill:#7A3FC9"/><title>Instagram: Antes y después Marea</title></g></svg></div></div>
+              <div class="k-graf" data-vista-panel="alcance" hidden><div class="os-grafica-caja"><svg class="os-grafica" viewBox="0 0 960 260" role="img" aria-label="Cuentas alcanzadas por día"><line x1="44" x2="946" y1="230" y2="230" class="kvg-eje"/><text x="36" y="234" text-anchor="end" class="kvg-t">0</text><line x1="44" x2="946" y1="206.4" y2="206.4" class="kvg-eje"/><text x="36" y="210.4" text-anchor="end" class="kvg-t">100</text><line x1="44" x2="946" y1="182.9" y2="182.9" class="kvg-eje"/><text x="36" y="186.9" text-anchor="end" class="kvg-t">200</text><line x1="44" x2="946" y1="159.3" y2="159.3" class="kvg-eje"/><text x="36" y="163.3" text-anchor="end" class="kvg-t">300</text><line x1="44" x2="946" y1="135.8" y2="135.8" class="kvg-eje"/><text x="36" y="139.8" text-anchor="end" class="kvg-t">400</text><line x1="44" x2="946" y1="112.2" y2="112.2" class="kvg-eje"/><text x="36" y="116.2" text-anchor="end" class="kvg-t">500</text><line x1="44" x2="946" y1="88.7" y2="88.7" class="kvg-eje"/><text x="36" y="92.7" text-anchor="end" class="kvg-t">600</text><line x1="44" x2="946" y1="65.1" y2="65.1" class="kvg-eje"/><text x="36" y="69.1" text-anchor="end" class="kvg-t">700</text><line x1="44" x2="946" y1="41.6" y2="41.6" class="kvg-eje"/><text x="36" y="45.6" text-anchor="end" class="kvg-t">800</text><line x1="44" x2="946" y1="18" y2="18" class="kvg-eje"/><text x="36" y="22" text-anchor="end" class="kvg-t">900</text><rect class="kvg-barra" x="49.4" y="141" width="19.2" height="89" rx="3"><title>19 sep: 378 cuentas alcanzadas</title></rect><text x="59" y="252" text-anchor="middle" class="kvg-t">19 sep</text><rect class="kvg-barra" x="79.5" y="37.3" width="19.2" height="192.7" rx="3"><title>20 sep: 818 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="109.5" y="161.7" width="19.2" height="68.3" rx="3"><title>21 sep: 290 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="139.6" y="159.3" width="19.2" height="70.7" rx="3"><title>22 sep: 300 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="169.7" y="42" width="19.2" height="188" rx="3"><title>23 sep: 798 cuentas alcanzadas</title></rect><text x="179.3" y="252" text-anchor="middle" class="kvg-t">23 sep</text><rect class="kvg-barra" x="199.7" y="44.6" width="19.2" height="185.4" rx="3"><title>24 sep: 787 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="229.8" y="154.9" width="19.2" height="75.1" rx="3"><title>25 sep: 319 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="259.9" y="67.5" width="19.2" height="162.5" rx="3"><title>26 sep: 690 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="289.9" y="23.7" width="19.2" height="206.3" rx="3"><title>27 sep: 876 cuentas alcanzadas</title></rect><text x="299.6" y="252" text-anchor="middle" class="kvg-t">27 sep</text><rect class="kvg-barra" x="320" y="85.1" width="19.2" height="144.9" rx="3"><title>28 sep: 615 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="350.1" y="129.7" width="19.2" height="100.3" rx="3"><title>29 sep: 426 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="380.1" y="127.5" width="19.2" height="102.5" rx="3"><title>30 sep: 435 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="410.2" y="31.9" width="19.2" height="198.1" rx="3"><title>1 oct: 841 cuentas alcanzadas</title></rect><text x="419.8" y="252" text-anchor="middle" class="kvg-t">1 oct</text><rect class="kvg-barra" x="440.3" y="86.5" width="19.2" height="143.5" rx="3"><title>2 oct: 609 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="470.3" y="107.5" width="19.2" height="122.5" rx="3"><title>3 oct: 520 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="500.4" y="83.7" width="19.2" height="146.3" rx="3"><title>4 oct: 621 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="530.5" y="138.6" width="19.2" height="91.4" rx="3"><title>5 oct: 388 cuentas alcanzadas</title></rect><text x="540.1" y="252" text-anchor="middle" class="kvg-t">5 oct</text><rect class="kvg-barra" x="560.5" y="47.7" width="19.2" height="182.3" rx="3"><title>6 oct: 774 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="590.6" y="89.4" width="19.2" height="140.6" rx="3"><title>7 oct: 597 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="620.7" y="59.7" width="19.2" height="170.3" rx="3"><title>8 oct: 723 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="650.7" y="31" width="19.2" height="199" rx="3"><title>9 oct: 845 cuentas alcanzadas</title></rect><text x="660.4" y="252" text-anchor="middle" class="kvg-t">9 oct</text><rect class="kvg-barra" x="680.8" y="107.7" width="19.2" height="122.3" rx="3"><title>10 oct: 519 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="710.9" y="120.7" width="19.2" height="109.3" rx="3"><title>11 oct: 464 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="740.9" y="28.6" width="19.2" height="201.4" rx="3"><title>12 oct: 855 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="771" y="167.1" width="19.2" height="62.9" rx="3"><title>13 oct: 267 cuentas alcanzadas</title></rect><text x="780.6" y="252" text-anchor="middle" class="kvg-t">13 oct</text><rect class="kvg-barra" x="801.1" y="166.4" width="19.2" height="63.6" rx="3"><title>14 oct: 270 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="831.1" y="171.6" width="19.2" height="58.4" rx="3"><title>15 oct: 248 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="861.2" y="42.7" width="19.2" height="187.3" rx="3"><title>16 oct: 795 cuentas alcanzadas</title></rect><rect class="kvg-barra" x="891.3" y="56.6" width="19.2" height="173.4" rx="3"><title>17 oct: 736 cuentas alcanzadas</title></rect><text x="900.9" y="252" text-anchor="middle" class="kvg-t">17 oct</text><rect class="kvg-barra" x="921.3" y="159.6" width="19.2" height="70.4" rx="3"><title>18 oct: 299 cuentas alcanzadas</title></rect><polyline class="kvg-media" points="149.2,124.8 179.3,108.3 209.4,97.7 239.4,105.8 269.5,95.3 299.6,93.4 329.6,82.4 359.7,78.2 389.8,90.4 419.8,88.6 449.9,78.8 480,84.6 510,93.1 540.1,100.8 570.2,89.1 600.2,83.6 630.3,87.6 660.4,79.6 690.4,79.7 720.5,85 750.6,69.3 780.6,86.3 810.7,97.3 840.8,113.3 870.8,115 900.9,107.7 931,113.2"/><g class="kvg-marca"><line x1="810.7" x2="810.7" y1="18" y2="230" style="stroke:#7A3FC9"/><circle cx="810.7" cy="16" r="6" style="fill:#7A3FC9"/><title>Instagram: Antes y después Marea</title></g></svg></div></div>
+              <div class="k-graf" data-vista-panel="seguidores" hidden><div class="os-grafica-caja"><svg class="os-grafica" viewBox="0 0 960 260" role="img" aria-label="Seguidores por día"><line x1="44" x2="946" y1="230" y2="230" class="kvg-eje"/><text x="36" y="234" text-anchor="end" class="kvg-t">0</text><line x1="44" x2="946" y1="124" y2="124" class="kvg-eje"/><text x="36" y="128" text-anchor="end" class="kvg-t">1.000</text><line x1="44" x2="946" y1="18" y2="18" class="kvg-eje"/><text x="36" y="22" text-anchor="end" class="kvg-t">2.000</text><rect class="kvg-barra" x="47.6" y="102.8" width="12.8" height="127.2" rx="3"><title>4 sep: 1.200 seguidores</title></rect><text x="54" y="252" text-anchor="middle" class="kvg-t">4 sep</text><rect class="kvg-barra" x="67.7" y="102.5" width="12.8" height="127.5" rx="3"><title>5 sep: 1.203 seguidores</title></rect><rect class="kvg-barra" x="87.7" y="102.2" width="12.8" height="127.8" rx="3"><title>6 sep: 1.206 seguidores</title></rect><rect class="kvg-barra" x="107.7" y="101.8" width="12.8" height="128.2" rx="3"><title>7 sep: 1.209 seguidores</title></rect><rect class="kvg-barra" x="127.8" y="101.5" width="12.8" height="128.5" rx="3"><title>8 sep: 1.212 seguidores</title></rect><rect class="kvg-barra" x="147.8" y="101.2" width="12.8" height="128.8" rx="3"><title>9 sep: 1.215 seguidores</title></rect><rect class="kvg-barra" x="167.9" y="100.9" width="12.8" height="129.1" rx="3"><title>10 sep: 1.218 seguidores</title></rect><text x="174.3" y="252" text-anchor="middle" class="kvg-t">10 sep</text><rect class="kvg-barra" x="187.9" y="100.6" width="12.8" height="129.4" rx="3"><title>11 sep: 1.221 seguidores</title></rect><rect class="kvg-barra" x="208" y="100.3" width="12.8" height="129.7" rx="3"><title>12 sep: 1.224 seguidores</title></rect><rect class="kvg-barra" x="228" y="99.9" width="12.8" height="130.1" rx="3"><title>13 sep: 1.227 seguidores</title></rect><rect class="kvg-barra" x="248.1" y="99.6" width="12.8" height="130.4" rx="3"><title>14 sep: 1.230 seguidores</title></rect><rect class="kvg-barra" x="268.1" y="99.3" width="12.8" height="130.7" rx="3"><title>15 sep: 1.233 seguidores</title></rect><rect class="kvg-barra" x="288.1" y="99" width="12.8" height="131" rx="3"><title>16 sep: 1.236 seguidores</title></rect><text x="294.6" y="252" text-anchor="middle" class="kvg-t">16 sep</text><rect class="kvg-barra" x="308.2" y="98.7" width="12.8" height="131.3" rx="3"><title>17 sep: 1.239 seguidores</title></rect><rect class="kvg-barra" x="328.2" y="98.3" width="12.8" height="131.7" rx="3"><title>18 sep: 1.242 seguidores</title></rect><rect class="kvg-barra" x="348.3" y="98" width="12.8" height="132" rx="3"><title>19 sep: 1.245 seguidores</title></rect><rect class="kvg-barra" x="368.3" y="97.7" width="12.8" height="132.3" rx="3"><title>20 sep: 1.248 seguidores</title></rect><rect class="kvg-barra" x="388.4" y="97.4" width="12.8" height="132.6" rx="3"><title>21 sep: 1.251 seguidores</title></rect><rect class="kvg-barra" x="408.4" y="97.1" width="12.8" height="132.9" rx="3"><title>22 sep: 1.254 seguidores</title></rect><text x="414.8" y="252" text-anchor="middle" class="kvg-t">22 sep</text><rect class="kvg-barra" x="428.5" y="96.8" width="12.8" height="133.2" rx="3"><title>23 sep: 1.257 seguidores</title></rect><rect class="kvg-barra" x="448.5" y="96.4" width="12.8" height="133.6" rx="3"><title>24 sep: 1.260 seguidores</title></rect><rect class="kvg-barra" x="468.5" y="96.1" width="12.8" height="133.9" rx="3"><title>25 sep: 1.263 seguidores</title></rect><rect class="kvg-barra" x="488.6" y="95.8" width="12.8" height="134.2" rx="3"><title>26 sep: 1.266 seguidores</title></rect><rect class="kvg-barra" x="508.6" y="95.5" width="12.8" height="134.5" rx="3"><title>27 sep: 1.269 seguidores</title></rect><rect class="kvg-barra" x="528.7" y="95.2" width="12.8" height="134.8" rx="3"><title>28 sep: 1.272 seguidores</title></rect><text x="535.1" y="252" text-anchor="middle" class="kvg-t">28 sep</text><rect class="kvg-barra" x="548.7" y="94.9" width="12.8" height="135.2" rx="3"><title>29 sep: 1.275 seguidores</title></rect><rect class="kvg-barra" x="568.8" y="94.5" width="12.8" height="135.5" rx="3"><title>30 sep: 1.278 seguidores</title></rect><rect class="kvg-barra" x="588.8" y="94.2" width="12.8" height="135.8" rx="3"><title>1 oct: 1.281 seguidores</title></rect><rect class="kvg-barra" x="608.9" y="93.9" width="12.8" height="136.1" rx="3"><title>2 oct: 1.284 seguidores</title></rect><rect class="kvg-barra" x="628.9" y="93.6" width="12.8" height="136.4" rx="3"><title>3 oct: 1.287 seguidores</title></rect><rect class="kvg-barra" x="648.9" y="93.3" width="12.8" height="136.7" rx="3"><title>4 oct: 1.290 seguidores</title></rect><text x="655.4" y="252" text-anchor="middle" class="kvg-t">4 oct</text><rect class="kvg-barra" x="669" y="92.9" width="12.8" height="137.1" rx="3"><title>5 oct: 1.293 seguidores</title></rect><rect class="kvg-barra" x="689" y="92.6" width="12.8" height="137.4" rx="3"><title>6 oct: 1.296 seguidores</title></rect><rect class="kvg-barra" x="709.1" y="92.3" width="12.8" height="137.7" rx="3"><title>7 oct: 1.299 seguidores</title></rect><rect class="kvg-barra" x="729.1" y="92" width="12.8" height="138" rx="3"><title>8 oct: 1.302 seguidores</title></rect><rect class="kvg-barra" x="749.2" y="91.7" width="12.8" height="138.3" rx="3"><title>9 oct: 1.305 seguidores</title></rect><rect class="kvg-barra" x="769.2" y="91.4" width="12.8" height="138.6" rx="3"><title>10 oct: 1.308 seguidores</title></rect><text x="775.6" y="252" text-anchor="middle" class="kvg-t">10 oct</text><rect class="kvg-barra" x="789.3" y="91" width="12.8" height="139" rx="3"><title>11 oct: 1.311 seguidores</title></rect><rect class="kvg-barra" x="809.3" y="90.7" width="12.8" height="139.3" rx="3"><title>12 oct: 1.314 seguidores</title></rect><rect class="kvg-barra" x="829.3" y="90.4" width="12.8" height="139.6" rx="3"><title>13 oct: 1.317 seguidores</title></rect><rect class="kvg-barra" x="849.4" y="90.1" width="12.8" height="139.9" rx="3"><title>14 oct: 1.320 seguidores</title></rect><rect class="kvg-barra" x="869.4" y="89.8" width="12.8" height="140.2" rx="3"><title>15 oct: 1.323 seguidores</title></rect><rect class="kvg-barra" x="889.5" y="89.4" width="12.8" height="140.6" rx="3"><title>16 oct: 1.326 seguidores</title></rect><text x="895.9" y="252" text-anchor="middle" class="kvg-t">16 oct</text><rect class="kvg-barra" x="909.5" y="89.1" width="12.8" height="140.9" rx="3"><title>17 oct: 1.329 seguidores</title></rect><rect class="kvg-barra" x="929.6" y="88.8" width="12.8" height="141.2" rx="3"><title>18 oct: 1.332 seguidores</title></rect><polyline class="kvg-media" points="114.2,102.3 134.2,102.2 154.2,102 174.3,101.8 194.3,101.5 214.4,101.2 234.4,100.9 254.5,100.6 274.5,100.3 294.6,99.9 314.6,99.6 334.6,99.3 354.7,99 374.7,98.7 394.8,98.3 414.8,98 434.9,97.7 454.9,97.4 475,97.1 495,96.8 515,96.4 535.1,96.1 555.1,95.8 575.2,95.5 595.2,95.2 615.3,94.9 635.3,94.5 655.4,94.2 675.4,93.9 695.4,93.6 715.5,93.3 735.5,92.9 755.6,92.6 775.6,92.3 795.7,92 815.7,91.7 835.8,91.4 855.8,91 875.8,90.7 895.9,90.4 915.9,90.1 936,89.8"/></svg></div></div>
+            <div class="k-ley">
+        <span><i class="barra"></i>Por día</span>
+        <span><i class="linea"></i>Media de 7 días</span>
+                  <span><i class="punto" style="background:#7A3FC9"></i>Pieza en Instagram</span>
+                  <span><i class="punto" style="background:#080808"></i>Pieza en LinkedIn</span>
+                  <span><i class="punto" style="background:#A580D6"></i>Pieza en Behance</span>
+              </div>
+      </section>
+</div>
+
+<!-- LAS PIEZAS: POR SALIR Y PUBLICADAS -->
+<div class="k-rejilla">
+  <section class="k-t s12" id="t-piezas" aria-labelledby="t-piezas-tit" data-vistas>
+    <div class="k-cab">
+      <h2 class="k-tit" id="t-piezas-tit">Piezas</h2>
+      <nav class="k-seg k-seg--suave" aria-label="Qué piezas ver">
+        <a href="redes.html#t-piezas" data-vista="salir" >Por salir <span class="n">6</span></a>
+        <a href="redes.html#t-piezas" data-vista="publicadas" aria-current="page">Publicadas <span class="n">1</span></a>
+      </nav>
+    </div>
+
+          <div data-vista-panel="salir" hidden>
+                  <table class="k-tabla k-tabla--piezas">
+            <thead><tr><th>Pieza</th><th>Sale</th><th>Estado</th><th><span class="k-oculto">Enlace y eliminar</span></th></tr></thead>
+            <tbody>    <tr>
+      <td class="k-td-pieza">
+        <div class="k-pieza">
+          <span class="k-red-ic k-red-ic--chica"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5h5a2.75 2.75 0 0 1 0 5.5H3zM3 12h5.5a2.75 2.75 0 0 1 0 5.5H3zM14.5 7.5h5M14 14.5h7a3.5 3.5 0 1 0-1.1 2.5"/></svg></span>
+          <div class="k-pieza-txt">
+                          <button type="button" class="k-pieza-tit" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:1,&quot;canal&quot;:&quot;behance&quot;,&quot;formato&quot;:&quot;Case Study&quot;,&quot;titulo&quot;:&quot;Caso de Estudio: Rebranding Kaiva Studio 2026&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}" title="Editar la pieza"><b>Caso de Estudio: Rebranding Kaiva Studio 2026</b></button>
+                        <small>Behance · Case Study</small>
+                      </div>
+        </div>
+      </td>
+      <td data-et="Sale">
+        <form method="POST" class="k-fecha-f">
+          <input type="hidden" name="crm_pieza_fecha" value="1">
+          <input type="hidden" name="pieza_id" value="1"><input type="hidden" name="red_vista" value="general">          <label class="k-pild" title="Cambiar la fecha de salida"><span>hoy</span>
+            <input type="date" name="fecha" value="2026-10-19" onchange="this.form.submit()" aria-label="Fecha de salida de «Caso de Estudio: Rebranding Kaiva Studio 2026»">
+          </label>
+        </form>
+      </td>
+      <td data-et="Estado">
+                <form method="POST">
+          <input type="hidden" name="crm_pieza_estado" value="1">
+          <input type="hidden" name="pieza_id" value="1"><input type="hidden" name="red_vista" value="general">          <select name="nuevo_estado" class="k-sel" aria-label="Estado de «Caso de Estudio: Rebranding Kaiva Studio 2026»" onchange="this.form.submit()">
+            <option value="planificado" >Planificada</option>
+            <option value="produccion" selected>En producción</option>
+            <option value="publicado" >Publicada</option>
+          </select>
+        </form>
+              </td>
+            <td class="k-td-acc">
+        <div class="k-acc-f">
+                      <button type="button" class="k-circ k-copiar" data-copia-os="https://kaivastudio.com/?utm_source=behance&amp;utm_medium=case_study&amp;utm_campaign=rebranding_2026" aria-label="Copiar enlace con UTM: https://kaivastudio.com/?utm_source=behance&amp;utm_medium=case_study&amp;utm_campaign=rebranding_2026"><span class="k-tip">Copiar enlace</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+                                <form method="POST" onsubmit="return confirm('¿Eliminar «Caso de Estudio: Rebranding Kaiva Studio 2026»?')"><input type="hidden" name="pieza_borrar" value="1"><input type="hidden" name="pieza_id" value="1"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-circ k-borrar" aria-label="Eliminar «Caso de Estudio: Rebranding Kaiva Studio 2026»"><span class="k-tip">Eliminar</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+                  </div>
+      </td>
+    </tr>
+        <tr>
+      <td class="k-td-pieza">
+        <div class="k-pieza">
+          <span class="k-red-ic k-red-ic--chica"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10.5V17M8 7.5v.01M12 17v-6.5M12 13.5a2.5 2.5 0 0 1 5 0V17"/></svg></span>
+          <div class="k-pieza-txt">
+                          <button type="button" class="k-pieza-tit" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:2,&quot;canal&quot;:&quot;linkedin&quot;,&quot;formato&quot;:&quot;Artículo / Post&quot;,&quot;titulo&quot;:&quot;Narrativa de Reposicionamiento y Arquitectura Web&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}" title="Editar la pieza"><b>Narrativa de Reposicionamiento y Arquitectura Web</b></button>
+                        <small>LinkedIn · Artículo / Post</small>
+                      </div>
+        </div>
+      </td>
+      <td data-et="Sale">
+        <form method="POST" class="k-fecha-f">
+          <input type="hidden" name="crm_pieza_fecha" value="1">
+          <input type="hidden" name="pieza_id" value="2"><input type="hidden" name="red_vista" value="general">          <label class="k-pild" title="Cambiar la fecha de salida"><span>hoy</span>
+            <input type="date" name="fecha" value="2026-10-19" onchange="this.form.submit()" aria-label="Fecha de salida de «Narrativa de Reposicionamiento y Arquitectura Web»">
+          </label>
+        </form>
+      </td>
+      <td data-et="Estado">
+                <form method="POST">
+          <input type="hidden" name="crm_pieza_estado" value="1">
+          <input type="hidden" name="pieza_id" value="2"><input type="hidden" name="red_vista" value="general">          <select name="nuevo_estado" class="k-sel" aria-label="Estado de «Narrativa de Reposicionamiento y Arquitectura Web»" onchange="this.form.submit()">
+            <option value="planificado" >Planificada</option>
+            <option value="produccion" selected>En producción</option>
+            <option value="publicado" >Publicada</option>
+          </select>
+        </form>
+              </td>
+            <td class="k-td-acc">
+        <div class="k-acc-f">
+                      <button type="button" class="k-circ k-copiar" data-copia-os="https://kaivastudio.com/?utm_source=linkedin&amp;utm_medium=social_post&amp;utm_campaign=rebranding_2026" aria-label="Copiar enlace con UTM: https://kaivastudio.com/?utm_source=linkedin&amp;utm_medium=social_post&amp;utm_campaign=rebranding_2026"><span class="k-tip">Copiar enlace</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+                                <form method="POST" onsubmit="return confirm('¿Eliminar «Narrativa de Reposicionamiento y Arquitectura Web»?')"><input type="hidden" name="pieza_borrar" value="1"><input type="hidden" name="pieza_id" value="2"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-circ k-borrar" aria-label="Eliminar «Narrativa de Reposicionamiento y Arquitectura Web»"><span class="k-tip">Eliminar</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+                  </div>
+      </td>
+    </tr>
+        <tr>
+      <td class="k-td-pieza">
+        <div class="k-pieza">
+          <span class="k-red-ic k-red-ic--chica"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span>
+          <div class="k-pieza-txt">
+                          <button type="button" class="k-pieza-tit" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:3,&quot;canal&quot;:&quot;instagram&quot;,&quot;formato&quot;:&quot;Carrusel Reel&quot;,&quot;titulo&quot;:&quot;Carrusel: Transformación Visual Antes vs Después&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}" title="Editar la pieza"><b>Carrusel: Transformación Visual Antes vs Después</b></button>
+                        <small>Instagram · Carrusel Reel</small>
+                      </div>
+        </div>
+      </td>
+      <td data-et="Sale">
+        <form method="POST" class="k-fecha-f">
+          <input type="hidden" name="crm_pieza_fecha" value="1">
+          <input type="hidden" name="pieza_id" value="3"><input type="hidden" name="red_vista" value="general">          <label class="k-pild" title="Cambiar la fecha de salida"><span>hoy</span>
+            <input type="date" name="fecha" value="2026-10-19" onchange="this.form.submit()" aria-label="Fecha de salida de «Carrusel: Transformación Visual Antes vs Después»">
+          </label>
+        </form>
+      </td>
+      <td data-et="Estado">
+                <form method="POST">
+          <input type="hidden" name="crm_pieza_estado" value="1">
+          <input type="hidden" name="pieza_id" value="3"><input type="hidden" name="red_vista" value="general">          <select name="nuevo_estado" class="k-sel" aria-label="Estado de «Carrusel: Transformación Visual Antes vs Después»" onchange="this.form.submit()">
+            <option value="planificado" >Planificada</option>
+            <option value="produccion" selected>En producción</option>
+            <option value="publicado" >Publicada</option>
+          </select>
+        </form>
+              </td>
+            <td class="k-td-acc">
+        <div class="k-acc-f">
+                      <button type="button" class="k-circ k-copiar" data-copia-os="https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=carousel&amp;utm_campaign=rebranding_2026" aria-label="Copiar enlace con UTM: https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=carousel&amp;utm_campaign=rebranding_2026"><span class="k-tip">Copiar enlace</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+                                <form method="POST" onsubmit="return confirm('¿Eliminar «Carrusel: Transformación Visual Antes vs Después»?')"><input type="hidden" name="pieza_borrar" value="1"><input type="hidden" name="pieza_id" value="3"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-circ k-borrar" aria-label="Eliminar «Carrusel: Transformación Visual Antes vs Después»"><span class="k-tip">Eliminar</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+                  </div>
+      </td>
+    </tr>
+        <tr>
+      <td class="k-td-pieza">
+        <div class="k-pieza">
+          <span class="k-red-ic k-red-ic--chica"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span>
+          <div class="k-pieza-txt">
+                          <button type="button" class="k-pieza-tit" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:4,&quot;canal&quot;:&quot;instagram&quot;,&quot;formato&quot;:&quot;Story Interactiva&quot;,&quot;titulo&quot;:&quot;Stickers de Enlace Directo en Stories&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-19&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}" title="Editar la pieza"><b>Stickers de Enlace Directo en Stories</b></button>
+                        <small>Instagram · Story Interactiva</small>
+                      </div>
+        </div>
+      </td>
+      <td data-et="Sale">
+        <form method="POST" class="k-fecha-f">
+          <input type="hidden" name="crm_pieza_fecha" value="1">
+          <input type="hidden" name="pieza_id" value="4"><input type="hidden" name="red_vista" value="general">          <label class="k-pild" title="Cambiar la fecha de salida"><span>hoy</span>
+            <input type="date" name="fecha" value="2026-10-19" onchange="this.form.submit()" aria-label="Fecha de salida de «Stickers de Enlace Directo en Stories»">
+          </label>
+        </form>
+      </td>
+      <td data-et="Estado">
+                <form method="POST">
+          <input type="hidden" name="crm_pieza_estado" value="1">
+          <input type="hidden" name="pieza_id" value="4"><input type="hidden" name="red_vista" value="general">          <select name="nuevo_estado" class="k-sel" aria-label="Estado de «Stickers de Enlace Directo en Stories»" onchange="this.form.submit()">
+            <option value="planificado" selected>Planificada</option>
+            <option value="produccion" >En producción</option>
+            <option value="publicado" >Publicada</option>
+          </select>
+        </form>
+              </td>
+            <td class="k-td-acc">
+        <div class="k-acc-f">
+                      <button type="button" class="k-circ k-copiar" data-copia-os="https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=story_sticker&amp;utm_campaign=rebranding_2026" aria-label="Copiar enlace con UTM: https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=story_sticker&amp;utm_campaign=rebranding_2026"><span class="k-tip">Copiar enlace</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+                                <form method="POST" onsubmit="return confirm('¿Eliminar «Stickers de Enlace Directo en Stories»?')"><input type="hidden" name="pieza_borrar" value="1"><input type="hidden" name="pieza_id" value="4"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-circ k-borrar" aria-label="Eliminar «Stickers de Enlace Directo en Stories»"><span class="k-tip">Eliminar</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+                  </div>
+      </td>
+    </tr>
+        <tr>
+      <td class="k-td-pieza">
+        <div class="k-pieza">
+          <span class="k-red-ic k-red-ic--chica"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span>
+          <div class="k-pieza-txt">
+                          <button type="button" class="k-pieza-tit" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:5,&quot;canal&quot;:&quot;instagram&quot;,&quot;formato&quot;:&quot;carrusel&quot;,&quot;titulo&quot;:&quot;5 errores de una web&quot;,&quot;texto&quot;:&quot;Cinco errores que hacen que tu web no venda.&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-23&quot;,&quot;hora&quot;:&quot;18:00&quot;,&quot;publicar_auto&quot;:1}" title="Editar la pieza"><b>5 errores de una web</b></button>
+                        <small>Instagram · carrusel</small>
+                      </div>
+        </div>
+      </td>
+      <td data-et="Sale">
+        <form method="POST" class="k-fecha-f">
+          <input type="hidden" name="crm_pieza_fecha" value="1">
+          <input type="hidden" name="pieza_id" value="5"><input type="hidden" name="red_vista" value="general">          <label class="k-pild" title="Cambiar la fecha de salida"><span>23 oct</span>
+            <input type="date" name="fecha" value="2026-10-23" onchange="this.form.submit()" aria-label="Fecha de salida de «5 errores de una web»">
+          </label>
+        </form>
+      </td>
+      <td data-et="Estado">
+                  <div class="k-estado">
+            <span class="k-chip negro">Programada</span>
+            <span class="k-estado-sub">23 oct, 18:00 · sale sola</span>
+                        <div class="k-estado-acc">
+                              <form method="POST" onsubmit="return confirm('¿Publicarla en Instagram ya?')"><input type="hidden" name="pieza_publicar_ahora" value="1"><input type="hidden" name="pieza_id" value="5"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-pild negra">Publicar ahora</button></form>
+                            <form method="POST"><input type="hidden" name="pieza_desprogramar" value="1"><input type="hidden" name="pieza_id" value="5"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-pild">Quitar de la programación</button></form>
+            </div>
+                      </div>
+              </td>
+            <td class="k-td-acc">
+        <div class="k-acc-f">
+                      <button type="button" class="k-circ k-copiar" data-copia-os="https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=5-errores-de-una-web" aria-label="Copiar enlace con UTM: https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=5-errores-de-una-web"><span class="k-tip">Copiar enlace</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+                                <form method="POST" onsubmit="return confirm('¿Eliminar «5 errores de una web»?')"><input type="hidden" name="pieza_borrar" value="1"><input type="hidden" name="pieza_id" value="5"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-circ k-borrar" aria-label="Eliminar «5 errores de una web»"><span class="k-tip">Eliminar</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+                  </div>
+      </td>
+    </tr>
+        <tr>
+      <td class="k-td-pieza">
+        <div class="k-pieza">
+          <span class="k-red-ic k-red-ic--chica"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10.5V17M8 7.5v.01M12 17v-6.5M12 13.5a2.5 2.5 0 0 1 5 0V17"/></svg></span>
+          <div class="k-pieza-txt">
+                          <button type="button" class="k-pieza-tit" data-abre="dlg-pieza" data-pieza="{&quot;id&quot;:6,&quot;canal&quot;:&quot;linkedin&quot;,&quot;formato&quot;:&quot;post&quot;,&quot;titulo&quot;:&quot;Caso Ruta Viajes&quot;,&quot;texto&quot;:&quot;&quot;,&quot;guion&quot;:&quot;&quot;,&quot;medios&quot;:[],&quot;fecha_publicacion&quot;:&quot;2026-10-25&quot;,&quot;hora&quot;:&quot;09:00&quot;,&quot;publicar_auto&quot;:0}" title="Editar la pieza"><b>Caso Ruta Viajes</b></button>
+                        <small>LinkedIn · post</small>
+                          <span class="k-chip violeta mini" title="La propuso Claude. Revísala, sube la imagen o el video y prográmala para aprobarla.">Propuesta de Claude</span>
+                      </div>
+        </div>
+      </td>
+      <td data-et="Sale">
+        <form method="POST" class="k-fecha-f">
+          <input type="hidden" name="crm_pieza_fecha" value="1">
+          <input type="hidden" name="pieza_id" value="6"><input type="hidden" name="red_vista" value="general">          <label class="k-pild" title="Cambiar la fecha de salida"><span>25 oct</span>
+            <input type="date" name="fecha" value="2026-10-25" onchange="this.form.submit()" aria-label="Fecha de salida de «Caso Ruta Viajes»">
+          </label>
+        </form>
+      </td>
+      <td data-et="Estado">
+                <form method="POST">
+          <input type="hidden" name="crm_pieza_estado" value="1">
+          <input type="hidden" name="pieza_id" value="6"><input type="hidden" name="red_vista" value="general">          <select name="nuevo_estado" class="k-sel" aria-label="Estado de «Caso Ruta Viajes»" onchange="this.form.submit()">
+            <option value="planificado" selected>Planificada</option>
+            <option value="produccion" >En producción</option>
+            <option value="publicado" >Publicada</option>
+          </select>
+        </form>
+              </td>
+            <td class="k-td-acc">
+        <div class="k-acc-f">
+                      <button type="button" class="k-circ k-copiar" data-copia-os="https://kaivastudio.com/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=caso-cs-travel" aria-label="Copiar enlace con UTM: https://kaivastudio.com/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=caso-cs-travel"><span class="k-tip">Copiar enlace</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+                                <form method="POST" onsubmit="return confirm('¿Eliminar «Caso Ruta Viajes»?')"><input type="hidden" name="pieza_borrar" value="1"><input type="hidden" name="pieza_id" value="6"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-circ k-borrar" aria-label="Eliminar «Caso Ruta Viajes»"><span class="k-tip">Eliminar</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+                  </div>
+      </td>
+    </tr>
+    </tbody>
+          </table>
+              </div>
+      <div data-vista-panel="publicadas" >
+                  <table class="k-tabla k-tabla--piezas">
+            <thead><tr><th>Pieza</th><th>Salió</th><th>Estado</th><th>¿Funcionó?</th><th><span class="k-oculto">Enlace y eliminar</span></th></tr></thead>
+            <tbody>    <tr>
+      <td class="k-td-pieza">
+        <div class="k-pieza">
+          <span class="k-red-ic k-red-ic--chica"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span>
+          <div class="k-pieza-txt">
+                          <b class="k-pieza-tit">Antes y después Marea</b>
+                        <small>Instagram · reel</small>
+                      </div>
+        </div>
+      </td>
+      <td data-et="Salió">
+        <form method="POST" class="k-fecha-f">
+          <input type="hidden" name="crm_pieza_fecha" value="1">
+          <input type="hidden" name="pieza_id" value="7"><input type="hidden" name="red_vista" value="general">          <label class="k-pild" title="Cambiar la fecha de salida"><span>14 oct</span>
+            <input type="date" name="fecha" value="2026-10-14" onchange="this.form.submit()" aria-label="Fecha de salida de «Antes y después Marea»">
+          </label>
+        </form>
+      </td>
+      <td data-et="Estado">
+                <form method="POST">
+          <input type="hidden" name="crm_pieza_estado" value="1">
+          <input type="hidden" name="pieza_id" value="7"><input type="hidden" name="red_vista" value="general">          <select name="nuevo_estado" class="k-sel k-sel--pub" aria-label="Estado de «Antes y después Marea»" onchange="this.form.submit()">
+            <option value="planificado" >Planificada</option>
+            <option value="produccion" >En producción</option>
+            <option value="publicado" selected>Publicada</option>
+          </select>
+        </form>
+              </td>
+              <td class="k-funciono k-funciono--neutro" data-et="¿Funcionó?">No cambió las visitas del sitio.          <small title="Promedio de visitas por día, la semana antes y la semana después">119,1 → 114,4 visitas/día</small>        </td>
+            <td class="k-td-acc">
+        <div class="k-acc-f">
+                      <button type="button" class="k-circ k-copiar" data-copia-os="https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=antes-y-despues-marea" aria-label="Copiar enlace con UTM: https://kaivastudio.com/?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=antes-y-despues-marea"><span class="k-tip">Copiar enlace</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+                                <form method="POST" onsubmit="return confirm('¿Eliminar «Antes y después Marea»?')"><input type="hidden" name="pieza_borrar" value="1"><input type="hidden" name="pieza_id" value="7"><input type="hidden" name="red_vista" value="general"><button type="submit" class="k-circ k-borrar" aria-label="Eliminar «Antes y después Marea»"><span class="k-tip">Eliminar</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+                  </div>
+      </td>
+    </tr>
+    </tbody>
+          </table>
+              </div>
+      </section>
+</div>
+
+<!-- ANOTAR LA SEMANA: LinkedIn (perfil y página) y Behance, a mano -->
+<dialog id="dlg-anotar" class="k-dlg" aria-labelledby="dlg-anotar-t">
+  <div class="k-dlg-cab">
+    <div><h2 id="dlg-anotar-t">Anotar la semana</h2><p>LinkedIn y Behance no se leen solos: un minuto y la curva queda completa. Llena solo lo que tengas.</p></div>
+    <button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <form method="POST">
+    <input type="hidden" name="red_anotar_semana" value="1">
+    <div class="k-red-filas">
+              <div class="k-red-fila">
+          <b>LinkedIn · perfil</b>
+          <label class="k-campo"><span class="k-et">Seguidores <small>antes 1.620</small></span>
+            <input class="k-in" type="number" min="0" inputmode="numeric" name="seguidores[linkedin]" aria-label="Seguidores de LinkedIn · perfil">
+          </label>
+          <div class="k-campo">
+            <span class="k-et"><label for="anotar-alc-linkedin">Impresiones</label> · <a href="https://www.linkedin.com/dashboard/" target="_blank" rel="noopener" title="Panel del perfil: seguidores e impresiones de la semana">dónde verlo</a></span>
+            <input class="k-in" type="number" min="0" inputmode="numeric" id="anotar-alc-linkedin" name="alcance[linkedin]" aria-label="Impresiones de la semana de LinkedIn · perfil">
+          </div>
+        </div>
+              <div class="k-red-fila">
+          <b>LinkedIn · página</b>
+          <label class="k-campo"><span class="k-et">Seguidores <small>antes —</small></span>
+            <input class="k-in" type="number" min="0" inputmode="numeric" name="seguidores[linkedin_pagina]" aria-label="Seguidores de LinkedIn · página">
+          </label>
+          <div class="k-campo">
+            <span class="k-et"><label for="anotar-alc-linkedin_pagina">Impresiones</label> · <a href="https://www.linkedin.com/company/137094174/admin/analytics/followers/" target="_blank" rel="noopener" title="Estadísticas de la página: seguidores (y en Contenido, impresiones)">dónde verlo</a></span>
+            <input class="k-in" type="number" min="0" inputmode="numeric" id="anotar-alc-linkedin_pagina" name="alcance[linkedin_pagina]" aria-label="Impresiones de la semana de LinkedIn · página">
+          </div>
+        </div>
+              <div class="k-red-fila">
+          <b>Behance</b>
+          <label class="k-campo"><span class="k-et">Seguidores <small>antes 320</small></span>
+            <input class="k-in" type="number" min="0" inputmode="numeric" name="seguidores[behance]" aria-label="Seguidores de Behance">
+          </label>
+          <div class="k-campo">
+            <span class="k-et"><label for="anotar-alc-behance">Vistas</label> · <a href="https://www.behance.net/kaivastudio/projects" target="_blank" rel="noopener" title="El perfil de Kaiva: seguidores, vistas y valoraciones de cada proyecto">dónde verlo</a></span>
+            <input class="k-in" type="number" min="0" inputmode="numeric" id="anotar-alc-behance" name="alcance[behance]" aria-label="Vistas de proyectos de Behance">
+          </div>
+        </div>
+          </div>
+    <div class="k-pie-dlg">
+      <button type="button" class="k-btn-sec" data-cierra>Cancelar</button>
+      <button type="submit" class="k-negra"><span>Guardar</span> <span class="k-flecha k-flecha--quieta"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></button>
+    </div>
+  </form>
+</dialog>
+
+  <dialog id="dlg-ig-token" class="k-dlg" aria-labelledby="dlg-ig-token-t">
+    <div class="k-dlg-cab">
+      <div><h2 id="dlg-ig-token-t">Conectar Instagram</h2><p>Con su token, el panel lee seguidores, alcance y cada publicación todas las noches.</p></div>
+      <button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <form method="POST" autocomplete="off" data-esperando="Conectando…">
+      <input type="hidden" name="red_ig_token" value="1">
+      <label class="k-campo"><span class="k-et">Token de Instagram <em>empieza por IG</em></span>
+        <input type="password" name="ig_token" required class="k-in" placeholder="IGAA…" autocomplete="off" spellcheck="false">
+      </label>
+      <ol class="k-pasos">
+        <li>En <b>developers.facebook.com</b>, abre la app → <b>Instagram</b> → <b>Configuración de la API con inicio de sesión de Instagram</b>.</li>
+        <li>En «Generar identificadores de acceso», agrega la cuenta de Kaiva y toca <b>Generar identificador</b>.</li>
+        <li>Pégalo aquí. Se guarda cifrado y se renueva solo.</li>
+      </ol>
+      <div class="k-pie-dlg">
+        <button type="button" class="k-btn-sec" data-cierra>Cancelar</button>
+        <button type="submit" class="k-negra"><span>Conectar</span> <span class="k-flecha k-flecha--quieta"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
+      </div>
+    </form>
+  </dialog>
+
+
+</div><!-- /.k-v-redes -->
+
+  <dialog id="dlg-pieza" class="k-dlg ancha os-prog" aria-labelledby="dlg-pieza-t">
+    <header class="k-dlg-cab"><div><h2 id="dlg-pieza-t">Programar publicación</h2><p>Se arma aquí y sale sola el día y la hora que digas.</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>    <form method="POST" class="os-prog-form k-prog" id="kv-prog">
+      <input type="hidden" name="crm_nueva_pieza" value="1">
+      <input type="hidden" name="red_vista" value="">
+      <input type="hidden" name="id" value="">
+      <input type="hidden" name="medios" value="[]">
+      <input type="hidden" name="estado" value="planificado">
+      <div class="os-prog-izq">
+        <fieldset class="os-prog-redes k-campo">
+          <legend class="k-et">Red</legend>
+          <label><input type="radio" name="canal" value="instagram" checked><span><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>Instagram</span></label>
+          <label><input type="radio" name="canal" value="linkedin"><span><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10.5V17M8 7.5v.01M12 17v-6.5M12 13.5a2.5 2.5 0 0 1 5 0V17"/></svg>LinkedIn</span></label>
+          <label><input type="radio" name="canal" value="behance"><span><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5h5a2.75 2.75 0 0 1 0 5.5H3zM3 12h5.5a2.75 2.75 0 0 1 0 5.5H3zM14.5 7.5h5M14 14.5h7a3.5 3.5 0 1 0-1.1 2.5"/></svg>Behance</span></label>
+          <label><input type="radio" name="canal" value="otro"><span>Otra</span></label>
+        </fieldset>
+
+                <fieldset class="os-prog-formatos k-campo" data-formatos>
+          <legend class="k-et">Formato</legend>
+          <label data-red="instagram"><input type="radio" name="formato" value="imagen"><span><b>Foto</b><small>1 imagen en el feed</small></span></label>
+          <label data-red="instagram linkedin"><input type="radio" name="formato" value="carrusel"><span><b>Carrusel</b><small>2 a 10 fotos o videos</small></span></label>
+          <label data-red="instagram"><input type="radio" name="formato" value="reel"><span><b>Reel</b><small>Video vertical</small></span></label>
+          <label data-red="instagram"><input type="radio" name="formato" value="historia"><span><b>Historia</b><small>Foto o video, 24 h</small></span></label>
+          <label data-red="linkedin otro"><input type="radio" name="formato" value="post"><span><b>Publicación</b><small>Texto con foto o video</small></span></label>
+          <label data-red="linkedin"><input type="radio" name="formato" value="articulo"><span><b>Artículo</b><small>Texto largo</small></span></label>
+          <label data-red="behance"><input type="radio" name="formato" value="caso"><span><b>Caso de estudio</b><small>Proyecto completo</small></span></label>
+        </fieldset>
+        <p class="os-prog-ficha" data-ficha></p>
+
+        <div class="k-campo">
+          <span class="k-et" data-medios-tit>Fotos y videos <em class="os-prog-medida" data-medida></em></span>
+          <div class="os-prog-medios" data-medios></div>
+          <label class="os-prog-subir k-suelta">
+            <i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></i>
+            <span><b data-subir-txt>Subir fotos o videos</b>En el reel puedes elegir la portada y mostrarlo también en el feed</span>
+            <input type="file" accept="image/*,video/mp4,video/quicktime" multiple data-subir>
+          </label>
+          <div class="os-prog-portada" data-portada hidden>
+            <span class="k-et">Portada del reel</span>
+            <div class="os-prog-portada-fila">
+              <video muted playsinline preload="auto" data-portada-video></video>
+              <div>
+                <input type="range" min="0" max="1000" value="0" step="1" data-portada-rango aria-label="Elegir el cuadro de la portada">
+                <p class="os-prog-ayuda" data-portada-txt>Mueve la barra para elegir el cuadro.</p>
+                <label class="os-prog-check"><input type="checkbox" data-feed checked> <span><b>Mostrarlo también en el feed</b> — así es un “video post”: sale en la cuadrícula y en Reels. Sin marcar, solo en Reels.</span></label>
+              </div>
+            </div>
+          </div>
+          <p class="os-prog-ayuda" data-medios-ayuda></p>
+        </div>
+
+        <label class="k-campo"><span class="k-et">Texto <em class="os-prog-cuenta" data-cuenta></em></span>
+          <textarea name="texto" rows="6" class="k-in" placeholder="Lo que va a leer la gente. La primera línea es la que se ve sin abrir." data-texto></textarea>
+        </label>
+
+                <label class="k-campo"><span class="k-et">Guion y notas <small>no se publica</small></span>
+          <textarea name="guion" rows="4" class="k-in" placeholder="Gancho de los primeros 3 segundos, los pasos, el cierre, qué hay que grabar o diseñar."></textarea>
+        </label>
+
+        <label class="k-campo"><span class="k-et">Título interno <small>opcional; si no, la primera línea</small></span>
+          <input type="text" name="titulo" class="k-in" placeholder="Caso Ruta Viajes · antes y después">
+        </label>
+
+        <div class="k-campos">
+          <label class="k-campo"><span class="k-et">Día</span>
+            <input type="date" name="fecha_publicacion" value="2026-10-20" min="2026-10-19" class="k-in">
+          </label>
+          <label class="k-campo"><span class="k-et">Hora <small>Colombia</small></span>
+            <input type="time" name="hora" value="09:00" class="k-in">
+          </label>
+        </div>
+
+        <label class="os-prog-auto k-interruptor" data-solo-ig>
+          <span>Que Instagram la publique sola<small>A esa hora. Si la quitas, te avisamos con el texto listo.</small></span>
+          <input type="checkbox" name="publicar_auto" value="1" checked>
+          <span class="k-sw" aria-hidden="true"></span>
+        </label>
+
+        <label class="k-campo"><span class="k-et">¿A qué página lleva? <small>para el enlace medible; si no, a la portada</small></span>
+          <input type="text" name="destino" class="k-in" placeholder="kaivastudio.com/portfolio/">
+        </label>
+        <p class="os-prog-error" data-error role="alert" hidden></p>
+      </div>
+
+      <aside class="os-prog-der" aria-label="Vista previa">
+        <div class="os-prog-vcab">
+          <span class="k-et os-prog-et">Así va a salir</span>
+          <nav class="k-seg k-seg--suave" aria-label="Qué ver" data-modos>
+            <a href="#" data-modo="post" aria-current="page">Publicación</a>
+            <a href="#" data-modo="feed">En el feed</a>
+          </nav>
+          <button type="button" class="k-circ k-circ--chico" data-ampliar title="Ampliar" aria-label="Ampliar la vista previa"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+        </div>
+        <div class="os-prog-vista" data-vista></div>
+      </aside>
+
+      <div class="k-pie-dlg os-prog-acciones">
+        <button type="submit" name="pieza_borrar" value="1" class="k-peligro os-prog-borrar" formnovalidate data-borrar hidden>Eliminar</button>
+        <button type="button" class="k-btn-sec" data-cierra>Cancelar</button>
+        <button type="submit" name="programar" value="0" class="k-btn-sec">Guardar borrador</button>
+        <button type="submit" name="programar" value="1" class="k-negra" data-programar><span>Programar</span><span class="k-flecha k-flecha--quieta"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M8 3.5v4M16 3.5v4"/></svg></span></button>
+      </div>
+    </form>
+  </dialog>
+  <script src="assets/programador.js" defer></script>
+
+            
+                                                    <script>
+(function () {
+  /* — Diálogos: [data-abre="id"] abre, [data-cierra] o clic fuera cierra — */
+  document.addEventListener('click', function (e) {
+    var abre = e.target.closest('[data-abre]');
+    if (abre) {
+      var d = document.getElementById(abre.getAttribute('data-abre'));
+      if (d && d.showModal) {
+        var padre = abre.closest('dialog');
+        if (padre && padre !== d) padre.close();
+        // Un botón puede preseleccionar valores del formulario: data-pre-campo="valor".
+        Array.prototype.forEach.call(abre.attributes, function (a) {
+          if (a.name.indexOf('data-pre-') === 0) {
+            var campo = a.name.slice(9);
+            // Un grupo de radios (las píldoras de las ventanas) se marca por su valor.
+            var radio = d.querySelector('input[type="radio"][name="' + campo + '"][value="' + a.value + '"]');
+            if (radio) { radio.checked = true; return; }
+            var c = d.querySelector('[name="' + campo + '"]');
+            if (c) c.value = a.value;
+          }
+        });
+        d.showModal();
+        var primero = d.querySelector('input:not([type=hidden]), select, textarea');
+        if (primero) primero.focus();
+      }
+      return;
+    }
+    if (e.target.closest('[data-cierra]') && !e.target.closest('[data-abre]')) {
+      var dlg = e.target.closest('dialog');
+      if (dlg) dlg.close();
+      return;
+    }
+    if (e.target.tagName === 'DIALOG' && e.target.open) {
+      var r = e.target.getBoundingClientRect();
+      var dentro = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!dentro) e.target.close();
+    }
+  });
+
+  /* — Analizar un dominio sin salir de la vista: [data-analizar="dominio"] —
+     Usa el mismo análisis (y la misma pantalla de espera) que el botón de
+     recargar de la barra; al terminar recarga y la fila ya trae su índice. */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-analizar]');
+    if (!b || typeof window.ejecutarAnalisis !== 'function') return;
+    window.ejecutarAnalisis(b.getAttribute('data-analizar'));
+  });
+
+  /* — Elegir un trato ganado rellena cliente y nombre del proyecto — */
+  document.addEventListener('change', function (e) {
+    var sel = e.target.closest('[data-rellena-proyecto]');
+    if (!sel) return;
+    var op = sel.options[sel.selectedIndex];
+    var f = sel.form;
+    if (op && op.dataset.cuenta) f.querySelector('[name="cuenta_id"]').value = op.dataset.cuenta;
+    var n = f.querySelector('[name="nombre"]');
+    if (op && op.dataset.nombre && !n.value) n.value = op.dataset.nombre;
+  });
+
+  /* — Un comprobante que pesa más de lo que PHP acepta (2 MB) se reduce en el
+       navegador antes de subirlo: las capturas del celular a veces pesan 3–4 MB
+       y no hace falta esa resolución para leer un comprobante. Los PDF no se
+       tocan. — */
+  document.addEventListener('change', function (e) {
+    var inp = e.target;
+    if (!inp.matches || !inp.matches('input[type="file"][name="comprobante"]')) return;
+    var f = inp.files && inp.files[0];
+    if (!f) return;
+    var autoenviar = inp.hasAttribute('data-autoenviar');
+    if (!/^image\//.test(f.type) || f.size <= 1800000) { if (autoenviar) inp.form.submit(); return; }
+    var img = new Image();
+    img.onload = function () {
+      var lado = 1800, k = Math.min(1, lado / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function (b) {
+        var dt = new DataTransfer();
+        dt.items.add(new File([b], f.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
+        inp.files = dt.files;
+        if (autoenviar) inp.form.submit();
+      }, 'image/jpeg', 0.85);
+    };
+    img.src = URL.createObjectURL(f);
+  });
+
+  /* — Adjuntar en una caja .k-suelta: se ve el nombre del archivo elegido — */
+  document.addEventListener('change', function (e) {
+    var inp = e.target;
+    if (!inp.matches || !inp.matches('.k-suelta input[type="file"]')) return;
+    var b = inp.closest('.k-suelta').querySelector('[data-suelta-nombre]');
+    if (b && inp.files && inp.files[0]) b.textContent = inp.files[0].name;
+  });
+
+  /* — Vistas dentro de la misma página: [data-vistas] agrupa, a[data-vista]
+       elige y [data-vista-panel="a b"] dice en qué vistas se ve cada pieza.
+       Pendientes/Hechos, Tablero/Contactos y los filtros de Finanzas ya
+       vienen todos en la página: cambiar es mostrar y esconder, al instante
+       y sin pedir nada al servidor. El enlace sigue siendo un enlace (?ver=,
+       ?modo=): la dirección se actualiza para que recargar o compartir caiga
+       en la misma vista, y sin guion funciona como antes. — */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-vista]');
+    if (!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var grupo = a.closest('[data-vistas]');
+    if (!grupo) return;
+    e.preventDefault();
+    var v = a.getAttribute('data-vista');
+    // Solo lo de este grupo: un grupo dentro de otro (los filtros de Dinero
+    // dentro de Ventas) se maneja solo.
+    var mio = function (el) { return el.parentElement.closest('[data-vistas]') === grupo || el.closest('[data-vistas]') === grupo; };
+    grupo.querySelectorAll('a[data-vista]').forEach(function (x) {
+      if (x.closest('[data-vistas]') !== grupo) return;
+      if (x.getAttribute('data-vista') === v) x.setAttribute('aria-current', 'page');
+      else x.removeAttribute('aria-current');
+    });
+    grupo.querySelectorAll('[data-vista-panel]').forEach(function (p) {
+      if (!mio(p)) return;
+      p.hidden = p.getAttribute('data-vista-panel').split(' ').indexOf(v) < 0;
+    });
+    try { history.replaceState(history.state, '', a.href); } catch (err) {}
+  });
+
+  /* — Ordenar sin recargar: [data-orden-grupo] agrupa, [data-ordenar="clave"]
+       ordena de mayor a menor los hijos de [data-ordenable] por su
+       atributo data-k-clave. (Publicaciones de Instagram: recientes, más
+       alcance, más interacción.) — */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-ordenar]');
+    if (!a) return;
+    var g = a.closest('[data-orden-grupo]');
+    var caja = g && g.querySelector('[data-ordenable]');
+    if (!caja) return;
+    e.preventDefault();
+    var k = 'data-k-' + a.getAttribute('data-ordenar');
+    var num = function (el) { var v = parseFloat(el.getAttribute(k)); return isNaN(v) ? -1 : v; };
+    Array.prototype.slice.call(caja.children)
+      .sort(function (x, y) { return num(y) - num(x); })
+      .forEach(function (c) { caja.appendChild(c); });
+    g.querySelectorAll('[data-ordenar]').forEach(function (x) {
+      if (x === a) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current');
+    });
+    caja.scrollIntoView({ block: 'nearest' });
+  });
+
+  /* — Buscar mientras se escribe: form[data-filtra="selector de filas"] —
+       Las filas ya están en la página; se esconden las que no coinciden
+       (sin mayúsculas ni tildes). Enter no recarga: ya está filtrado. — */
+  function sinTildes(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function filtrar(f) {
+    var caja = f.closest('section, details, .os-card') || document;
+    var inp = f.querySelector('input[type="search"]');
+    var q = sinTildes((inp && inp.value || '').trim());
+    var n = 0;
+    caja.querySelectorAll(f.getAttribute('data-filtra')).forEach(function (fila) {
+      var ve = q === '' || sinTildes(fila.textContent).indexOf(q) >= 0;
+      fila.hidden = !ve;
+      if (ve) n++;
+    });
+    var cuenta = caja.querySelector('[data-filtra-n]');
+    if (cuenta) cuenta.textContent = n;
+    var vacio = caja.querySelector('[data-filtra-vacio]');
+    if (vacio) vacio.hidden = n > 0;
+  }
+  document.addEventListener('input', function (e) {
+    var f = e.target.form;
+    if (f && f.hasAttribute('data-filtra')) filtrar(f);
+  });
+  document.addEventListener('submit', function (e) {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-filtra')) { e.preventDefault(); filtrar(e.target); }
+  });
+
+  /* — Marcar un seguimiento como hecho, al momento: form[data-al-momento] —
+       Antes era un POST con recarga entera: un segundo de espera y la agenda
+       volvía arriba del todo, justo cuando se estaba repasando la lista. Ahora
+       la fila se va en el acto y el guardado viaja por detrás. Si el servidor
+       no confirma, se recarga la página para enseñar lo que de verdad quedó. */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f.matches || !f.matches('form[data-al-momento]') || !window.fetch) return;
+    e.preventDefault();
+    fetch(f.getAttribute('action') || location.href, {
+      method: 'POST', body: new FormData(f), credentials: 'same-origin', redirect: 'manual'
+    }).then(function (r) {
+      if (!(r.type === 'opaqueredirect' || r.ok)) throw new Error('no guardó');
+    }).catch(function () { location.reload(); });
+
+    var fila = f.closest('.os-tarea, .k-fila');
+    if (!fila) return;
+    var grupo = fila.closest('.os-grupo-t, .k-grupo');
+    var panel = fila.closest('[data-vista-panel]');
+    var urgente = grupo && /--(vencidas|hoy)\b/.test(grupo.className);
+    fila.classList.add('os-saliendo', 'saliendo');
+    setTimeout(function () {
+      fila.remove();
+      if (grupo) {
+        var quedan = grupo.querySelectorAll('.os-tarea, .k-fila').length;
+        var cab = grupo.querySelector('.os-grupo-t-cab, .k-grupo-cab');
+        if (!quedan) grupo.remove();
+        else if (cab && cab.lastChild) cab.lastChild.nodeValue = ' · ' + quedan;
+      }
+      if (panel) {
+        var total = panel.querySelectorAll('.os-tarea:not(.os-recordatorio), .k-fila').length;
+        var n = document.querySelector('#agenda [data-vista-panel="' + panel.getAttribute('data-vista-panel') + '"]:is(.n, .k-n)');
+        if (n) n.textContent = total;
+        if (!total) {
+          var p = document.createElement('p');
+          p.className = 'os-al-dia k-vacio';
+          p.textContent = 'Todo al día.';
+          panel.appendChild(p);
+        }
+      }
+      // El aviso de la barra de íconos: seguimientos de hoy o atrasados.
+      var aviso = urgente && document.querySelector('.k-badge-hoy');
+      if (aviso) {
+        var k = parseInt(aviso.textContent, 10) - 1;
+        if (k > 0) aviso.textContent = k; else aviso.remove();
+      }
+    }, 280);
+  });
+
+  /* — Formularios que tardan (conectar o leer Instagram): el botón dice que
+       está trabajando y no se puede pulsar dos veces. Sin esto el clic no
+       daba ninguna señal durante 10-15 s y parecía que no hacía nada. — */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f.matches || !f.matches('form[data-esperando]')) return;
+    var b = f.querySelector('button[type="submit"], button:not([type])');
+    if (!b) return;
+    if (b.disabled) { e.preventDefault(); return; }
+    var et = b.querySelector('span') || b;
+    et.textContent = f.getAttribute('data-esperando');
+    setTimeout(function () { b.disabled = true; }, 0);
+  });
+
+  /* — Copiar al portapapeles: [data-copia="texto"] — */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copia-os]');
+    if (!b) return;
+    var txt = b.getAttribute('data-copia-os');
+    var et = b.querySelector('span');
+    var antes = et ? et.textContent : '';
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject())
+      .then(function () { if (et) et.textContent = 'Copiado'; })
+      .catch(function () { if (et) et.textContent = 'No se pudo copiar'; })
+      .finally(function () { setTimeout(function () { if (et) et.textContent = antes; }, 1800); });
+  });
+
+  /* — Tablero: arrastrar un trato a otra columna lo mueve de etapa —
+     No llama a ninguna API nueva: pone la etapa en el desplegable de la
+     propia tarjeta y envía su formulario, que es lo mismo que haría la
+     persona a mano. Si algo falla, falla igual que el desplegable. */
+  /* (Piel nueva, 2026-10-19: .k-kanban / .k-col / .k-trato, en k-ventas.css.) */
+  var tablero = document.querySelector('.k-v-ventas .k-kanban');
+  if (tablero) {
+    var arrastrado = null;
+    tablero.addEventListener('dragstart', function (e) {
+      var t = e.target.closest('.k-trato');
+      if (!t) return;
+      arrastrado = t;
+      t.classList.add('arrastrando');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', t.dataset.id || '');
+    });
+    tablero.addEventListener('dragend', function () {
+      if (arrastrado) arrastrado.classList.remove('arrastrando');
+      arrastrado = null;
+      tablero.querySelectorAll('.destino').forEach(function (c) { c.classList.remove('destino'); });
+    });
+    tablero.addEventListener('dragover', function (e) {
+      var col = e.target.closest('.k-col');
+      if (!col || !arrastrado) return;
+      e.preventDefault();
+      tablero.querySelectorAll('.destino').forEach(function (c) { if (c !== col) c.classList.remove('destino'); });
+      col.classList.add('destino');
+    });
+    tablero.addEventListener('drop', function (e) {
+      var col = e.target.closest('.k-col');
+      if (!col || !arrastrado) return;
+      e.preventDefault();
+      var etapa = col.dataset.etapa;
+      var sel = arrastrado.querySelector('select[name="nueva_etapa"]');
+      if (!sel || sel.value === etapa) return;
+      var lista = col.querySelector('.k-col-lista');
+      var vacia = lista.querySelector('.k-vacia');
+      if (vacia) vacia.remove();
+      lista.appendChild(arrastrado);
+      sel.value = etapa;
+      sel.form.submit();
+    });
+  }
+
+  /* — Lista de verificación del lanzamiento: se recuerda en este navegador —
+     Es una ayuda de memoria personal, no un registro del equipo; por eso
+     vive en localStorage y no en la base de datos. */
+  document.querySelectorAll('[data-check-id]').forEach(function (c) {
+    var k = 'kvos-check-' + c.getAttribute('data-check-id');
+    try { c.checked = localStorage.getItem(k) === '1'; } catch (err) {}
+    c.addEventListener('change', function () {
+      try { localStorage.setItem(k, c.checked ? '1' : '0'); } catch (err) {}
+      contarFases();
+    });
+  });
+  function contarFases() {
+    document.querySelectorAll('[data-fase]').forEach(function (f) {
+      var t = f.querySelectorAll('[data-check-id]').length;
+      var h = f.querySelectorAll('[data-check-id]:checked').length;
+      var o = f.querySelector('.os-progreso');
+      if (o) o.textContent = h + ' de ' + t;
+    });
+  }
+  contarFases();
+
+  /* — Avance de "Analizar todos" (Sitios): [data-analisis-red] —
+     El análisis corre en el servidor, en segundo plano. Aquí solo se
+     pregunta cada 4 s cómo va y, al terminar, se recarga para que cada
+     tarjeta traiga su índice nuevo. */
+  var ar = document.querySelector('[data-analisis-red]');
+  if (ar && window.fetch) {
+    var tic = setInterval(function () {
+      fetch('/api/os.php?action=red_estado', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          var e = j && j.estado;
+          if (!e || e.fin) { clearInterval(tic); location.reload(); return; }
+          var h = ar.querySelector('[data-ar-hechos]');
+          var a = ar.querySelector('[data-ar-actual]');
+          var b = ar.querySelector('[data-ar-barra]');
+          if (h) h.textContent = e.hechos;
+          if (a) a.textContent = e.actual || '';
+          if (b && e.total) b.style.width = Math.round(e.hechos / e.total * 100) + '%';
+        })
+        .catch(function () {});
+    }, 4000);
+  }
+})();
+</script>
+
+<div class="asis" id="asis">
+  <button type="button" class="asis-boton" id="asis-boton" aria-expanded="false" aria-controls="asis-caja" title="Pregúntale al robot">
+    <canvas id="asis-robot" width="96" height="96" aria-hidden="true"></canvas>    <span class="asis-nombre">Pregúntale</span>
+  </button>
+  <section class="asis-caja" id="asis-caja" hidden aria-label="Asistente de Kaiva">
+    <div class="asis-charla" id="asis-charla" aria-live="polite">
+      <p class="asis-msj asis-msj--el">¡Hola! Soy el robot de Kaiva 👋 Pregúntame cómo va el estudio. Escribe «ayuda» para ver qué sé.</p>
+    </div>
+    <div class="asis-chips" id="asis-chips"></div>
+    <button type="button" class="asis-telefono" id="asis-telefono">📱 Usarlo en el teléfono</button>
+    <form class="asis-form" id="asis-form">
+      <input type="text" id="asis-texto" maxlength="300" autocomplete="off" placeholder="¿Cómo vamos?" aria-label="Pregunta">
+      <button type="submit">Enviar</button>
+    </form>
+  </section>
+</div>
+<script>
+(function () {
+  var caja = document.getElementById('asis-caja');
+  var boton = document.getElementById('asis-boton');
+  var charla = document.getElementById('asis-charla');
+  var chips = document.getElementById('asis-chips');
+  var form = document.getElementById('asis-form');
+  var campo = document.getElementById('asis-texto');
+  if (!caja) return;
+
+  /* La sesión del panel vence tras 24 min sin actividad aunque la página siga abierta: se avisa en vez de fallar callado. */
+  var VENCIDA = 'Tu sesión del panel venció. Recarga la página (F5) y vuelve a entrar.';
+  function leerRespuesta (r) {
+    if (r.status === 401) { var e = new Error('vencida'); e.vencida = true; throw e; }
+    return r.json();
+  }
+  var robot = function (estado, segundos) { if (window.kvRobot) window.kvRobot.estado(estado, segundos); };
+  /* El robot de la cabecera de Inicio también abre el chat; mientras está
+     abierto, escucha (ondas moradas) y el saludo dice «Te escucho…». */
+  var arriba = Array.prototype.slice.call(document.querySelectorAll('[data-asis-abrir]'));
+  var saludo = document.querySelector('[data-saludo-txt]');
+  var saludoAntes = saludo ? saludo.textContent : '';
+  function abrir (si) {
+    caja.hidden = !si;
+    boton.setAttribute('aria-expanded', si ? 'true' : 'false');
+    arriba.forEach(function (b) { b.setAttribute('aria-expanded', si ? 'true' : 'false'); b.classList.toggle('escucha', si); });
+    if (saludo) saludo.textContent = si ? 'Te escucho…' : saludoAntes;
+    if (si) { campo.focus(); robot('feliz', 1.6); }
+  }
+  campo.addEventListener('input', function () { robot(campo.value ? 'escuchando' : 'neutral'); });
+  boton.addEventListener('click', function () { abrir(caja.hidden); });
+  arriba.forEach(function (b) { b.addEventListener('click', function () { abrir(caja.hidden); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !caja.hidden) abrir(false); });
+
+  function mensaje (texto, quien) {
+    var p = document.createElement('p');
+    p.className = 'asis-msj asis-msj--' + quien;
+    p.textContent = texto;
+    charla.appendChild(p);
+    charla.scrollTop = charla.scrollHeight;
+    return p;
+  }
+
+  function sugerir (lista) {
+    chips.textContent = '';
+    (lista || []).forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = s;
+      b.addEventListener('click', function () { preguntar(s); });
+      chips.appendChild(b);
+    });
+  }
+
+  function preguntar (texto) {
+    texto = (texto || '').trim();
+    if (!texto) return;
+    mensaje(texto, 'yo');
+    var espera = mensaje('…', 'el');
+    robot('pensando');
+    fetch('/api/asistente.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ texto: texto }) })
+      .then(leerRespuesta)
+      .then(function (d) {
+        espera.textContent = d.texto || 'No te entendí.';
+        robot('hablando', Math.min(4, 1 + (d.texto || '').length / 60));
+        sugerir(d.sugerencias);
+        if (d.ir) setTimeout(function () { location.href = '?tab=' + encodeURIComponent(d.ir); }, 500);
+      })
+      .catch(function (e) { espera.textContent = e && e.vencida ? VENCIDA : 'No pude conectarme. Intenta de nuevo.'; robot('sorprendido', 1.5); });
+  }
+
+  form.addEventListener('submit', function (e) { e.preventDefault(); preguntar(campo.value); campo.value = ''; });
+
+  /* — En vivo con el teléfono (voz/sala.py): le manda el mouse y obedece lo que le piden por voz — */
+  var canal = { ws: null, espera: 1000, ultimo: 0, telefono: 0 };
+  function llaveCanal () {
+    try {
+      var g = JSON.parse(localStorage.getItem('kaiva-canal') || 'null');
+      if (g && g.vence > Date.now() + 86400000) return Promise.resolve(g.llave);
+    } catch (e) {}
+    return fetch('/api/robot-llave.php', { method: 'POST', credentials: 'same-origin' }).then(leerRespuesta).then(function (d) {
+      var llave = d.url.split('#k=')[1];
+      try { localStorage.setItem('kaiva-canal', JSON.stringify({ llave: llave, vence: Date.parse(d.vence) })); } catch (e) {}
+      return llave;
+    });
+  }
+  function conectar () {
+    llaveCanal().then(function (llave) {
+      var host = location.hostname === 'localhost' ? 'localhost:8090' : location.host + '/ws';
+      var ws = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + host + '/?rol=panel&k=' + encodeURIComponent(llave));
+      canal.ws = ws;
+      ws.onopen = function () { canal.espera = 1000; };
+      ws.onmessage = function (e) {
+        var m;
+        try { m = JSON.parse(e.data); } catch (x) { return; }
+        if (m.t === 'presencia') {
+          canal.telefono = m.telefono || 0;
+          boton.title = canal.telefono ? 'Pregúntale al robot · el teléfono está conectado' : 'Pregúntale al robot';
+        }
+        if (m.t === 'charla' && m.texto) {   // lo que le dijeron al teléfono también queda en el chat
+          if (m.oido) mensaje(m.oido, 'yo');
+          mensaje('📱 ' + m.texto, 'el');
+          robot('hablando', Math.min(4, 1 + m.texto.length / 60));
+        }
+        if (m.t === 'ir' && /^[a-z]+$/.test(m.tab || '')) {
+          robot('feliz', 1.2);
+          var u = new URL(location.href);
+          u.searchParams.set('tab', m.tab);
+          setTimeout(function () { location.href = u.toString(); }, 600);
+        }
+      };
+      ws.onclose = function (e) {
+        canal.ws = null;
+        if (e.code === 4401) { try { localStorage.removeItem('kaiva-canal'); } catch (x) {} }
+        setTimeout(conectar, canal.espera);
+        canal.espera = Math.min(30000, canal.espera * 2);
+      };
+    }).catch(function () { setTimeout(conectar, 30000); });
+  }
+  document.addEventListener('mousemove', function (e) {
+    var ahora = Date.now();
+    if (!canal.ws || canal.ws.readyState !== 1 || !canal.telefono || ahora - canal.ultimo < 60) return;
+    canal.ultimo = ahora;
+    canal.ws.send(JSON.stringify({ t: 'cursor', x: +(e.clientX / innerWidth).toFixed(3), y: +(e.clientY / innerHeight).toFixed(3) }));
+  });
+  conectar();
+
+  /* — El robot en el teléfono: un QR con una llave que sólo sirve para preguntarle (src/robot-llave.php) — */
+  document.getElementById('asis-telefono').addEventListener('click', function () {
+    var aviso = mensaje('Preparando el código…', 'el');
+    var cargarQR = window.qrcode ? Promise.resolve() : new Promise(function (ok, mal) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+      s.onload = ok; s.onerror = mal;
+      document.head.appendChild(s);
+    });
+    Promise.all([cargarQR, fetch('/api/robot-llave.php', { method: 'POST', credentials: 'same-origin' }).then(leerRespuesta)])
+      .then(function (res) {
+        var d = res[1];
+        var qr = window.qrcode(0, 'M');
+        qr.addData(d.url);
+        qr.make();
+        aviso.textContent = 'Escanéalo con la cámara del teléfono y ponlo acostado debajo del monitor. Ahí puedes hablarle o escribirle. El enlace vale hasta el ' + d.vence + '.';
+        var cuadro = document.createElement('div');
+        cuadro.className = 'asis-qr';
+        cuadro.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2, scalable: true });
+        charla.appendChild(cuadro);
+        charla.scrollTop = charla.scrollHeight;
+        robot('entusiasmado', 2);
+      })
+      .catch(function (e) { aviso.textContent = e && e.vencida ? VENCIDA : 'No pude crear el código. Intenta de nuevo.'; robot('sorprendido', 1.5); });
+  });
+  sugerir(['¿Cómo vamos?', '¿Qué hay para hoy?', '¿Qué falta por cobrar?', '¿Cómo van los proyectos?']);
+})();
+</script>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  } }
+</script>
+<script type="module" src="robot/asistente.js"></script>
+            
+                  </main>
+    </div>
+  </div>
+  <script>
+    /* El dominio de este panel. Había tres llamadas a ejecutarAnalisis(): dos
+       pasándole el dominio y una sin ningún argumento, que mandaba
+       `url: undefined` al backend y volvía con un error de validación dentro
+       de un alert(). Ahora el dominio lo sabe el guion. */
+    var KV_DOMINIO = "kaivastudio.com";
+  </script>
+  <script src="assets/panel.js"></script>
+  <script src="assets/k-vida.js" defer></script>
+<script>
+/* Vista previa: aquí nada se guarda. */
+document.addEventListener('submit', function (e) { e.preventDefault(); e.stopImmediatePropagation(); }, true);
+</script>
+</body>
+
+</html>

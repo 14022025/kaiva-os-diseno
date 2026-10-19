@@ -1,0 +1,391 @@
+/* ============================================================================
+   KAIVA OS — REDES (?tab=lanzamiento, y ?red=instagram|linkedin|behance)
+   ----------------------------------------------------------------------------
+   Sale de la maqueta aprobada «Redes» (2026-10-19) y de la ventana «Anotar la
+   semana» del tablero «Ventanas». Todo vive dentro de .k-v-redes: la maqueta
+   usa nombres (.k-pz, .k-dia, .k-feed…) que en otros tableros son otra cosa.
+   Las piezas generales (.k-t, .k-cifra, .k-seg, .k-tabla, .k-dlg…) están en
+   k-base.css; aquí solo lo propio de Redes.
+   ============================================================================ */
+
+.k-v-redes { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.k-v-redes [id] { scroll-margin-top: 24px; }
+
+/* ---- Cabecera ---- */
+.k-v-redes .k-banda .k-pblanca svg { flex: none; }
+
+/* ---- Avisos ---- */
+.k-v-redes .k-aviso > svg { color: #080808; }
+.k-v-redes .k-aviso .k-negra { text-decoration: none; }
+.k-v-redes .k-aviso--bien > svg { color: #7A3FC9; }
+.k-v-redes .k-alerta > svg { flex: none; }
+
+/* ---- Ícono de cada red: círculo de contorno ---- */
+.k-v-redes .k-red-ic {
+  flex: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px #DADADE;
+  display: grid; place-items: center;
+  color: #080808;
+}
+.k-v-redes .k-red-ic--chica { width: 36px; height: 36px; }
+
+/* ============================================================================
+   GENERAL
+   ============================================================================ */
+
+/* Cómo vas: tres frases en la tarjeta negra */
+.k-v-redes .k-frases { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); }
+.k-v-redes .k-frase { padding: 4px 24px; min-width: 0; }
+.k-v-redes .k-frase:first-child { padding-left: 0; }
+.k-v-redes .k-frase + .k-frase { box-shadow: inset 1px 0 0 rgba(251, 251, 251, .14); }
+.k-v-redes .k-frases .k-mono { color: rgba(251, 251, 251, .5); display: block; margin-bottom: 10px; }
+.k-v-redes .k-frases p { margin: 0; font-size: 18px; line-height: 1.35; font-weight: 500; letter-spacing: -.02em; text-wrap: pretty; }
+.k-v-redes .k-frases p b { color: #A580D6; font-weight: 600; }
+
+/* Anillo de la meta de la semana */
+.k-v-redes .k-meta { display: flex; align-items: center; gap: 16px; margin: 12px 0 8px; }
+.k-v-redes .k-meta svg { transform: rotate(-90deg); flex: none; }
+.k-v-redes .k-meta circle + circle { animation: k-redes-anillo 1.4s var(--k-ease) both; }
+@keyframes k-redes-anillo { from { stroke-dasharray: 0 999; } }
+.k-v-redes .k-meta b { font-size: 40px; line-height: 1; font-weight: 600; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.k-v-redes .k-meta b small { font-size: 14px; font-weight: 500; color: #4E4E55; letter-spacing: 0; margin-left: 4px; }
+
+/* Una tarjeta por red */
+.k-v-redes .k-red-cab { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.k-v-redes .k-red-cab .k-cifra-et { color: #080808; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-v-redes .k-cifra--red { font-size: 34px; }
+.k-v-redes .k-pie--fila { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.k-v-redes .k-red-t .k-circ { width: 30px; height: 30px; }
+.k-v-redes .k-red-t:hover .k-circ { background: #080808; color: #FFFFFF !important; }
+
+/* Las próximas dos semanas */
+.k-v-redes .k-ley { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 12.5px; color: #4E4E55; margin-top: 14px; }
+.k-v-redes .k-ley span { display: inline-flex; align-items: center; gap: 7px; }
+.k-v-redes .k-ley i { flex: none; display: inline-block; }
+.k-v-redes .k-ley--cab { margin: 0; }
+.k-v-redes .k-ley i.ig, .k-v-redes .k-pz i.ig { background: #4E1E86; }
+.k-v-redes .k-ley i.li, .k-v-redes .k-pz i.li { background: #080808; }
+.k-v-redes .k-ley i.be, .k-v-redes .k-pz i.be { box-shadow: inset 0 0 0 1.5px #4E1E86; }
+.k-v-redes .k-pz i.otro { background: #8C8C93; }
+.k-v-redes .k-ley--cab i { width: 8px; height: 8px; border-radius: 50%; }
+
+.k-v-redes .k-cal { display: flex; flex-direction: column; gap: 10px; overflow-x: auto; scrollbar-width: thin; }
+.k-v-redes .k-semana { display: grid; grid-template-columns: repeat(7, minmax(128px, 1fr)); gap: 10px; }
+.k-v-redes .k-dia {
+  position: relative;
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 124px; min-width: 0;
+  padding: 12px; box-sizing: border-box;
+  border-radius: 18px; background: #F0F0F2;
+  transition: background .3s, box-shadow .3s;
+}
+.k-v-redes .k-dia:hover { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px #DADADE; }
+.k-v-redes .k-dia.hoy { background: #FFFFFF; box-shadow: inset 0 0 0 1.5px #080808; }
+.k-v-redes .k-dia-cab { display: flex; align-items: center; justify-content: space-between; min-height: 30px; }
+.k-v-redes .k-dia-cab .k-mono { color: #4E4E55; }
+.k-v-redes .k-dia-cab b { font-size: 20px; font-weight: 600; letter-spacing: -.03em; line-height: 1; }
+.k-v-redes .k-dia.hoy .k-dia-cab b { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #080808; color: #FFFFFF; font-size: 14px; }
+.k-v-redes .k-pz {
+  display: flex; gap: 8px; align-items: flex-start;
+  width: 100%; padding: 8px 10px; box-sizing: border-box;
+  border-radius: 12px; background: #FFFFFF; text-align: left;
+  transition: transform .3s var(--k-ease), box-shadow .3s;
+}
+.k-v-redes .k-dia.hoy .k-pz, .k-v-redes .k-dia:hover .k-pz { box-shadow: inset 0 0 0 1px #DADADE; }
+.k-v-redes .k-pz[data-abre]:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px #080808; }
+.k-v-redes .k-pz--publicado { cursor: var(--k-cursor), default; }
+.k-v-redes .k-pz--publicado span { color: #4E4E55; }
+.k-v-redes .k-pz i { flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; }
+.k-v-redes .k-pz span { min-width: 0; font-size: 12.5px; line-height: 1.3; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.k-v-redes .k-pz small { display: block; font-size: 12.5px; font-weight: 500; color: #4E4E55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.k-v-redes .k-pz--error span { color: #080808; }
+.k-v-redes .k-pz--error i { box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 3.5px #080808; }
+.k-v-redes .k-mas {
+  position: relative;
+  margin: auto auto 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: #080808; background: #FFFFFF;
+  opacity: 0; transform: scale(.85);
+  transition: opacity .25s, transform .3s var(--k-ease), background .3s, color .3s;
+}
+.k-v-redes .k-dia:hover .k-mas, .k-v-redes .k-mas:focus-visible { opacity: 1; transform: none; box-shadow: inset 0 0 0 1.5px #DADADE; }
+.k-v-redes .k-mas:hover { background: #080808; color: #FFFFFF; box-shadow: none; }
+.k-v-redes .k-mas .k-tip { left: 50%; top: auto; bottom: calc(100% + 6px); transform: translate(-50%, -4px); border-radius: 16px; }
+.k-v-redes .k-mas:hover .k-tip { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================================
+   INSTAGRAM
+   ============================================================================ */
+.k-v-redes .k-ig-cifras { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.k-v-redes .k-ig-cifras > div { padding: 14px; border-radius: 16px; box-shadow: inset 0 0 0 1.5px #F0F0F2; min-width: 0; }
+.k-v-redes .k-ig-cifras b { display: block; font-size: 24px; font-weight: 600; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1.25; }
+.k-v-redes .k-ig-cifras span { font-size: 12.5px; color: #4E4E55; }
+
+.k-v-redes .k-dicen { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.k-v-redes .k-dicen li { display: flex; gap: 12px; font-size: 14px; line-height: 1.45; padding-bottom: 12px; border-bottom: 1px solid #F0F0F2; }
+.k-v-redes .k-dicen li:last-child { border-bottom: 0; padding-bottom: 0; }
+.k-v-redes .k-dicen li span { flex: none; font-weight: 600; font-size: 11px; color: #7A3FC9; padding-top: 3px; }
+.k-v-redes .k-dicen--mal span { color: #080808 !important; font-weight: 600; }
+.k-v-redes .k-dicen--neutro span { color: #8C8C93 !important; }
+
+/* Tu feed */
+.k-v-redes .k-tit .k-chip--cola { margin-left: 6px; vertical-align: 3px; }
+.k-v-redes .k-cab .k-chip svg { flex: none; }
+.k-v-redes a.k-chip:hover { box-shadow: inset 0 0 0 1.5px #080808; color: #080808; }
+.k-v-redes .k-perfil { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; min-width: 0; }
+.k-v-redes .k-foto { flex: none; width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #080808; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 4.5px #DADADE; }
+.k-v-redes .k-perfil-txt { min-width: 0; }
+.k-v-redes .k-perfil-u { font-weight: 600; }
+.k-v-redes .k-perfil-n { display: flex; gap: 4px 18px; font-size: 13px; color: #4E4E55; flex-wrap: wrap; }
+.k-v-redes .k-perfil-n b { color: #080808; font-weight: 600; }
+.k-v-redes .k-perfil-bio { font-size: 13px; color: #4E4E55; line-height: 1.45; margin-top: 2px; }
+.k-v-redes .k-perfil-bio b { color: #080808; font-weight: 600; }
+.k-v-redes .k-perfil-bio p { margin: 0; }
+.k-v-redes .k-perfil-bio a { font-weight: 600; color: #080808; }
+.k-v-redes .k-feed { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; border-radius: 16px; overflow: hidden; }
+.k-v-redes .k-post {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  display: block; width: 100%;
+  overflow: hidden;
+  background: #F0F0F2;
+}
+.k-v-redes .k-post img, .k-v-redes .k-post video { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--k-ease); }
+.k-v-redes .k-post:hover img, .k-v-redes .k-post:hover video { transform: scale(1.04); }
+.k-v-redes .k-post.cola::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 2px #080808; pointer-events: none; }
+.k-v-redes .k-post .v {
+  position: absolute; inset: 0;
+  display: grid; place-items: center; padding: 8px; text-align: center;
+  background: rgba(8, 8, 8, .6); color: #FFFFFF;
+  font-size: 12.5px; font-weight: 600;
+  opacity: 0; transition: opacity .3s;
+}
+.k-v-redes .k-post:hover .v, .k-v-redes .k-post:focus-visible .v { opacity: 1; }
+.k-v-redes .k-post .et {
+  position: absolute; left: 8px; top: 8px; z-index: 1;
+  max-width: calc(100% - 40px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 4px 9px; border-radius: 999px;
+  background: #080808; color: #FFFFFF;
+  font-size: 10.5px; font-weight: 600; line-height: 1.2;
+}
+.k-v-redes .k-post-tipo { position: absolute; right: 9px; top: 9px; z-index: 1; color: #FFFFFF; filter: drop-shadow(0 1px 2px rgba(8, 8, 8, .5)); display: grid; }
+
+/* Cómo le fue a cada una: la lista se desplaza dentro de la tarjeta, así el
+   alto de la fila lo pone el feed y las dos tarjetas quedan parejas. */
+.k-v-redes .k-pubs-caja { position: relative; flex: 1 1 auto; min-height: 460px; }
+.k-v-redes .k-pubs {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: #DADADE transparent;
+  padding-right: 2px;
+}
+.k-v-redes .k-pubs-ancho .k-pubs-caja { min-height: 0; }
+.k-v-redes .k-pubs-ancho .k-pubs { position: static; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; padding: 0; }
+.k-v-redes .k-pub { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 18px; box-shadow: inset 0 0 0 1.5px #F0F0F2; min-width: 0; }
+.k-v-redes .k-pub-cab { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12.5px; }
+.k-v-redes .k-pub-txt { margin: 0; font-size: 13px; line-height: 1.45; color: #4E4E55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.k-v-redes .k-pub-alc { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.k-v-redes .k-pub-alc b { font-size: 26px; letter-spacing: -.04em; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.k-v-redes .k-pub-alc span { font-size: 12.5px; color: #4E4E55; }
+.k-v-redes .k-pub-alc em { font-style: normal; }
+.k-v-redes .k-pub-alc em.bien { color: #4E1E86; font-weight: 600; }
+.k-v-redes .k-pub-alc em.mal { color: #080808; font-weight: 600; }
+.k-v-redes .k-pub-d { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; text-align: center; margin: 0; }
+.k-v-redes .k-pub-d div { min-width: 0; }
+.k-v-redes .k-pub-d dd { margin: 0; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.k-v-redes .k-pub-d dt { font-size: 11px; color: #4E4E55; }
+.k-v-redes .k-pub-pie { display: flex; flex-wrap: wrap; gap: 2px 0; font-size: 12.5px; color: #4E4E55; }
+.k-v-redes .k-pub-pie > * + *::before { content: "·"; margin: 0 6px; color: #8C8C93; }
+.k-v-redes .k-pub-pie a { font-weight: 600; color: #080808; }
+.k-v-redes .k-pub-pie a:hover { color: #4E1E86; }
+
+/* El visor de una publicación (clic en el feed) */
+.k-v-redes dialog.k-dlg.k-visor { padding: 0; max-width: 980px; overflow: hidden; }
+.k-v-redes dialog.k-dlg.k-visor[open] { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 0; }
+.k-v-redes .k-visor-media { position: relative; background: #080808; min-height: 320px; display: grid; place-items: center; }
+.k-v-redes .k-visor-media img { display: block; width: 100%; height: 100%; max-height: calc(100vh - 48px); object-fit: contain; }
+.k-v-redes .k-visor-fl {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #FFFFFF; color: #080808;
+  display: grid; place-items: center; font-size: 22px; line-height: 1;
+  transition: background .3s, color .3s;
+}
+.k-v-redes .k-visor-fl:hover { background: #080808; color: #FFFFFF; box-shadow: 0 0 0 1.5px #FFFFFF; }
+.k-v-redes .k-visor-fl.izq { left: 12px; }
+.k-v-redes .k-visor-fl.der { right: 12px; }
+.k-v-redes .k-visor-fl[hidden] { display: none; }
+.k-v-redes .k-visor-puntos { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 5px; }
+.k-v-redes .k-visor-puntos i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .45); }
+.k-v-redes .k-visor-puntos i.on { background: #FFFFFF; }
+.k-v-redes .k-visor-lado { display: flex; flex-direction: column; gap: 14px; padding: 22px; min-width: 0; max-height: calc(100vh - 48px); box-sizing: border-box; }
+.k-v-redes .k-visor-cab { display: flex; align-items: center; gap: 10px; }
+.k-v-redes .k-visor-cab img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #F0F0F2; }
+.k-v-redes .k-visor-cab b { flex: 1; font-weight: 600; }
+.k-v-redes .k-visor-txt { flex: 1 1 auto; margin: 0; overflow-y: auto; white-space: pre-line; font-size: 14px; line-height: 1.5; }
+.k-v-redes .k-visor-pie { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid #F0F0F2; font-size: 13px; }
+.k-v-redes .k-visor-cifras { font-weight: 600; }
+.k-v-redes .k-visor-acc { display: flex; gap: 8px; flex-wrap: wrap; }
+.k-v-redes .k-visor-acc .k-btn-sec, .k-v-redes .k-visor-acc .k-negra { height: 40px; font-size: 13.5px; }
+.k-v-redes .k-visor-acc [hidden] { display: none; }
+
+/* ============================================================================
+   LINKEDIN Y BEHANCE
+   ============================================================================ */
+.k-v-redes .k-alto { grid-row: span 2; }
+.k-v-redes .k-donde { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; color: #080808; text-decoration: underline; text-underline-offset: 3px; }
+.k-v-redes .k-donde:hover { color: #4E1E86; }
+.k-v-redes .k-tabla--semanas td b { font-weight: 600; }
+
+/* ============================================================================
+   GRÁFICA (el SVG lo arma kv_grafica_diaria en _os.php)
+   ============================================================================ */
+.k-v-redes .k-graf { min-width: 0; }
+.k-v-redes .k-graf[hidden] { display: none; }
+.k-v-redes .k-graf .os-grafica-caja { overflow-x: auto; scrollbar-width: thin; }
+.k-v-redes .k-graf svg.os-grafica { display: block; width: 100%; min-width: 620px; height: auto; }
+.k-v-redes .k-graf .os-grafica .kvg-eje { stroke: #F0F0F2; stroke-width: 1; }
+.k-v-redes .k-graf .os-grafica .kvg-t { font: 500 11px Geist, system-ui, sans-serif; fill: #8C8C93; }
+.k-v-redes .k-graf .os-grafica .kvg-barra { fill: #E6E6EA; transition: fill .2s; }
+.k-v-redes .k-graf .os-grafica .kvg-barra:hover { fill: #4E1E86; }
+.k-v-redes .k-graf .os-grafica .kvg-media { fill: none; stroke: #080808; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.k-v-redes .k-graf .os-grafica .kvg-marca line { stroke-width: 1.5; stroke-dasharray: 3 4; }
+.k-v-redes .k-graf .os-grafica .kvg-marca circle { stroke: #FFFFFF; stroke-width: 3; }
+.k-v-redes .k-ley i.barra { width: 12px; height: 12px; border-radius: 3px; background: #E6E6EA; }
+.k-v-redes .k-ley i.linea { width: 16px; height: 2px; background: #080808; }
+.k-v-redes .k-ley i.punto { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ============================================================================
+   PIEZAS
+   ============================================================================ */
+.k-v-redes .k-tabla--piezas td { padding-top: 12px; padding-bottom: 12px; }
+.k-v-redes .k-pieza { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.k-v-redes .k-pieza-txt { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.k-v-redes .k-pieza-tit { text-align: left; font-weight: 600; }
+.k-v-redes .k-pieza-tit b { font-weight: 600; }
+.k-v-redes button.k-pieza-tit b { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; transition: text-decoration-color .3s; }
+.k-v-redes button.k-pieza-tit:hover b { text-decoration-color: #080808; }
+.k-v-redes .k-pieza-txt small { display: block; font-size: 12.5px; color: #4E4E55; }
+.k-v-redes .k-pieza-txt .k-chip { margin-top: 6px; }
+.k-v-redes .k-pild {
+  position: relative;
+  height: 30px; padding: 0 12px; box-sizing: border-box;
+  border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600; white-space: nowrap; color: #080808;
+  box-shadow: inset 0 0 0 1.5px #DADADE;
+  transition: box-shadow .3s, background .3s, color .3s;
+}
+.k-v-redes .k-pild:hover { box-shadow: inset 0 0 0 1.5px #080808; }
+.k-v-redes .k-pild.negra { background: #080808; color: #FFFFFF; box-shadow: none; }
+.k-v-redes .k-pild.negra:hover { background: #4E1E86; }
+.k-v-redes .k-pild--vacia { color: #4E4E55; }
+.k-v-redes .k-fecha-f { margin: 0; }
+.k-v-redes .k-fecha-f input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: var(--k-cursor), pointer; }
+.k-v-redes .k-fecha-f input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: var(--k-cursor), pointer; }
+.k-v-redes .k-fecha-f:focus-within .k-pild { outline: 2px solid #7A3FC9; outline-offset: 3px; }
+.k-v-redes .k-estado { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.k-v-redes .k-estado-sub { font-size: 12px; color: #4E4E55; max-width: 300px; }
+.k-v-redes .k-estado-acc { display: flex; gap: 6px; flex-wrap: wrap; }
+.k-v-redes .k-estado-acc form { margin: 0; }
+.k-v-redes .k-chip--error { box-shadow: inset 0 0 0 1.5px #080808; }
+.k-v-redes .k-sel--pub { background-color: #FFFFFF; box-shadow: inset 0 0 0 1.5px #A580D6; color: #4E1E86; }
+.k-v-redes .k-funciono { font-size: 13px; max-width: 300px; }
+.k-v-redes .k-funciono small { display: block; margin-top: 2px; font-size: 12px; color: #8C8C93; font-variant-numeric: tabular-nums; }
+.k-v-redes .k-funciono--bien { color: #4E1E86; font-weight: 600; }
+.k-v-redes .k-funciono--mal { color: #080808; font-weight: 600; }
+.k-v-redes .k-funciono--apagado { color: #8C8C93; }
+.k-v-redes .k-acc-f { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+.k-v-redes .k-acc-f form { margin: 0; }
+.k-v-redes .k-borrar { opacity: 0; transition: opacity .25s, transform .35s var(--k-ease), background .3s, color .3s; }
+.k-v-redes .k-tabla tr:hover .k-borrar, .k-v-redes .k-borrar:focus-visible { opacity: 1; }
+.k-v-redes .k-tabla--piezas .k-circ { width: 34px; height: 34px; }
+
+/* Vacío: sin piezas, o Instagram sin conectar */
+.k-v-redes .k-vacio { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 28px 12px; }
+.k-v-redes .k-vacio h3 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.035em; line-height: 1.15; }
+.k-v-redes .k-vacio p { margin: 0; max-width: 440px; font-size: 14px; color: #4E4E55; }
+.k-v-redes .k-vacio .k-negra { margin-top: 6px; }
+
+/* ============================================================================
+   VENTANAS PROPIAS: Anotar la semana y Conectar Instagram
+   ============================================================================ */
+.k-v-redes .k-red-filas { display: flex; flex-direction: column; }
+.k-v-redes .k-red-fila { display: grid; grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: end; padding: 12px 0; border-bottom: 1px solid #F0F0F2; }
+.k-v-redes .k-red-fila:first-child { padding-top: 0; }
+.k-v-redes .k-red-fila:last-child { border-bottom: 0; }
+.k-v-redes .k-red-fila > b { font-size: 14px; font-weight: 600; padding-bottom: 13px; }
+.k-v-redes .k-red-fila .k-et label { cursor: inherit; }
+.k-v-redes .k-red-fila .k-et a { font-size: 12px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; color: #4E4E55; }
+.k-v-redes .k-red-fila .k-et a:hover { color: #4E1E86; }
+.k-v-redes dialog.k-dlg .k-pasos { margin: 0; padding: 14px 16px 14px 34px; border-radius: 16px; box-shadow: inset 0 0 0 1.5px #F0F0F2; font-size: 13px; line-height: 1.5; color: #4E4E55; display: flex; flex-direction: column; gap: 6px; }
+.k-v-redes dialog.k-dlg .k-pasos b { color: #080808; font-weight: 600; }
+.k-v-redes dialog.k-dlg .k-pasos li::marker { font-weight: 600; font-size: 11px; color: #7A3FC9; }
+
+/* ============================================================================
+   TABLETA (≤ 1180 px)
+   ============================================================================ */
+@media (max-width: 1180px) {
+  .k-v-redes .k-frases { grid-template-columns: 1fr; gap: 18px; }
+  .k-v-redes .k-frase { padding: 0; }
+  .k-v-redes .k-frase + .k-frase { box-shadow: none; padding-top: 18px; border-top: 1px solid rgba(251, 251, 251, .14); }
+  .k-v-redes .k-alto { grid-row: auto; }
+  .k-v-redes .k-rejilla--red > .s4 { grid-column: span 6; }
+  .k-v-redes .k-rejilla--red > .k-sitio { grid-column: span 12; }
+  .k-v-redes .k-pubs-caja { min-height: 0; }
+  .k-v-redes .k-pubs, .k-v-redes .k-pubs-ancho .k-pubs { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; overflow: visible; padding: 0; }
+  .k-v-redes .k-feed { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .k-v-redes .k-cal { overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+  .k-v-redes .k-semana { grid-template-columns: repeat(7, 140px); }
+  .k-v-redes .k-dia { scroll-snap-align: start; }
+  .k-v-redes dialog.k-dlg.k-visor[open] { grid-template-columns: 1fr; overflow-y: auto; }
+  .k-v-redes .k-visor-media { min-height: 0; }
+  .k-v-redes .k-visor-media img { max-height: 60vh; }
+  .k-v-redes .k-visor-lado { max-height: none; }
+}
+
+/* ============================================================================
+   CELULAR (≤ 760 px)
+   ============================================================================ */
+@media (max-width: 760px) {
+  .k-v-redes { gap: 14px; }
+  .k-v-redes .k-banda .k-acc { width: 100%; flex-direction: column; align-items: stretch; }
+  .k-v-redes .k-banda .k-acc > * { justify-content: space-between; }
+  .k-v-redes .k-banda .k-pblanca { justify-content: center; }
+  .k-v-redes .k-frases p { font-size: 16.5px; }
+  .k-v-redes .k-rejilla--red > .s4 { grid-column: span 12; }
+  .k-v-redes .k-ig-cifras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .k-v-redes .k-feed { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .k-v-redes .k-perfil { align-items: flex-start; }
+  .k-v-redes .k-pubs, .k-v-redes .k-pubs-ancho .k-pubs { grid-template-columns: 1fr; }
+  .k-v-redes .k-pub-d dt { font-size: 10.5px; }
+  .k-v-redes .k-dia .k-mas { opacity: 1; transform: none; box-shadow: inset 0 0 0 1.5px #DADADE; }
+  .k-v-redes .k-mas .k-tip { display: none; }
+  /* Piezas: la fila apilada; nada se esconde. */
+  .k-v-redes .k-tabla--piezas td.k-td-acc { flex: 1 1 100%; }
+  .k-v-redes .k-acc-f { justify-content: flex-start; }
+  .k-v-redes .k-borrar { opacity: 1; }
+  .k-v-redes .k-funciono { max-width: none; flex: 1 1 100%; }
+  .k-v-redes .k-funciono[data-et]::before { display: block; }
+  /* «Copiar enlace» se lee: en el celular no hay burbuja al pasar. */
+  .k-v-redes .k-tabla--piezas .k-copiar { width: auto; height: 34px; padding: 0 14px; border-radius: 999px; display: inline-flex; flex-direction: row-reverse; gap: 7px; font-size: 12.5px; font-weight: 600; }
+  .k-v-redes .k-tabla--piezas .k-copiar .k-tip { display: inline; position: static; opacity: 1; transform: none; padding: 0; background: none; color: inherit; font-size: inherit; font-weight: inherit; border-radius: 0; }
+  .k-v-redes .k-red-fila { grid-template-columns: 1fr 1fr; }
+  .k-v-redes .k-red-fila > b { grid-column: 1 / -1; padding: 0; }
+  .k-v-redes dialog.k-dlg.k-visor { border-radius: 28px 28px 0 0; }
+}
+
+/* Las tablas viejas del panel (os.css/panel.css: `body.kv-os table th`) ponen
+   mayúsculas, letra mono y una raya bajo cada celda: aquí no. */
+body.kv-os .k-v-redes .k-tabla th { font-family: inherit; letter-spacing: 0; text-transform: none; border: 0; font-size: 12px; font-weight: 500; color: #4E4E55; }
+body.kv-os .k-v-redes .k-tabla td { border: 0; }
+/* En el interruptor suave la elegida es blanca: su número no puede ser blanco. */
+.k-v-redes .k-seg--suave > [aria-current="page"] .n, .k-v-redes .k-seg--suave > .on .n { background: #F0F0F2; color: #080808; }
+/* panel.css da a toda <table> min-width: 420px: en el celular empujaba la página. */
+body.kv-os .k-v-redes .k-tabla { min-width: 0; }

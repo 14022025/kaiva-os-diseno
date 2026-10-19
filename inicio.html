@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Inicio · Kaiva OS</title>
+  <link rel="icon" href="assets/kaiva-k.png" type="image/png" sizes="192x192">
+  <!-- LA LETRA DEL SITIO NUEVO: GEIST.
+       Esto servía Inter e Inter Tight desde kaivastudio.com/assets/fonts para
+       no pedirle nada a Google detrás de un login. El sitio cambió de piel en
+       octubre de 2026 y ahora carga Geist y Geist Mono desde Google Fonts en
+       todas sus páginas; el panel hace lo mismo para que la letra sea la
+       misma. Es un panel interno del equipo: el argumento del consentimiento
+       (no conectar a terceros sin permiso del visitante) aquí no aplica.
+       Si algún día se quiere cero terceros, el cambio es copiar los dos
+       woff2 a public/assets/fonts y cambiar estas tres líneas. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+  <!-- El sistema visual. Se sirve desde NUESTRO origen, no desde el landing:
+       las fuentes de arriba sí pueden venir de kaivastudio.com porque una
+       fuente que tarda solo retrasa el intercambio de tipografía, pero una
+       hoja de estilos bloquea el pintado. Enlazar la del landing metería
+       GitHub Pages en la ruta crítica de arranque del panel, y si tarda, el
+       panel pinta sin colores.
+
+       public/assets/tokens.css es una copia byte a byte de
+       assets/tokens.css del landing. `php src/verificar-tokens.php` compara
+       las dos y falla si divergen; se corre antes de publicar. -->
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="assets/os.css">
+  <!-- CAMBIAR DE PESTAÑA SIN ESPERAR.
+       Al dejar el puntero un instante sobre un enlace del panel (todos
+       empiezan por "?": ?tab=crm, ?tab=finanzas…), el navegador prepara esa
+       página por detrás; al hacer clic ya está hecha y aparece al momento.
+       Solo enlaces internos que leen: nada de /api/ ni formularios. Chrome y
+       Edge lo hacen; los demás navegadores lo ignoran y cargan como siempre.
+       Las pestañas del menú se descargan apenas carga la página (prefetch:
+       solo el HTML, sin ejecutar nada): el servidor está lejos (≈ 85 ms de
+       ida y vuelta) y así el clic no espera a la red. -->
+  <script type="speculationrules">
+  {"prefetch": [{"where": {"selector_matches": ".k-riel a[href^='?']"}, "eagerness": "immediate"}],
+   "prerender": [{"where": {"selector_matches": "a[href^='?']:not([data-vista])"}, "eagerness": "moderate"}]}
+  </script>
+  <link rel="stylesheet" href="assets/panel.css">
+    <link rel="stylesheet" href="assets/k-base.css">
+    <link rel="stylesheet" href="assets/k-inicio.css">
+  </head>
+
+<body class="kv-os">
+  <!-- LA PANTALLA DE ESPERA. Ver la nota larga del CSS (.scanner-overlay).
+       Lo que hay que mirar aquí es el marcado que le faltaba: role="dialog" +
+       aria-modal + tabindex="-1" para poder llevarle el foco, el Cancelar
+       visible desde el primer segundo, y el bloque de fallo con role="alert"
+       que sustituye a los dos alert() del navegador.
+       El título dice "Analizando", no "Ejecutando Auditoría Pro": el
+       vocabulario del producto tiene un verbo para esto y no es auditar. -->
+  <div class="scanner-overlay" id="scannerOverlay" role="dialog" aria-modal="true"
+       aria-labelledby="scanTitle" tabindex="-1" hidden>
+    <div class="scan-caja">
+      <img src="assets/kaiva-k.png" alt="" class="scan-robot float-robot">
+      <h2 class="scan-title" id="scanTitle">Analizando tu sitio</h2>
+
+      <div class="scan-progress-box" id="scanBarra">
+        <div class="scan-progress-bar"></div>
+      </div>
+
+      <p class="scan-status" id="scanStatus"></p>
+
+      <button type="button" class="scan-btn-sec" id="scanCancelar">Cancelar</button>
+
+      <div class="scan-fallo" id="scanFallo" role="alert" hidden>
+        <p class="scan-fallo-txt" id="scanFalloTxt"></p>
+        <div class="scan-fallo-acciones">
+          <button type="button" class="btn-chico" id="scanReintentar">Reintentar</button>
+          <button type="button" class="scan-btn-sec" id="scanCerrar">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <p id="kvAnuncio" class="kv-anuncio" role="status" aria-live="polite"></p>
+
+  <div class="tool-shell k-raiz">
+    <div class="k-marco">
+
+                <nav class="k-riel" aria-label="Secciones de Kaiva OS">
+          <a class="k-logo" href="inicio.html" aria-label="Kaiva OS, ir a Inicio">K<span class="k-tip">Kaiva OS</span></a>
+                      <a class="k-ico on" href="inicio.html" aria-current="page" aria-label="Inicio · 1 seguimiento para hoy o atrasado">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg>              <span class="k-badge k-badge-hoy" aria-hidden="true">1</span>              <span class="k-tip" aria-hidden="true">Inicio · 1 seguimiento para hoy o atrasado</span>
+            </a>
+                      <a class="k-ico" href="ventas.html" aria-label="Ventas · tablero, contactos y dinero">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>                            <span class="k-tip" aria-hidden="true">Ventas · tablero, contactos y dinero</span>
+            </a>
+                      <a class="k-ico" href="proyectos.html" aria-label="Proyectos · 1 entrega con la fecha pasada">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>              <span class="k-badge" aria-hidden="true">1</span>              <span class="k-tip" aria-hidden="true">Proyectos · 1 entrega con la fecha pasada</span>
+            </a>
+                      <a class="k-ico" href="redes.html" aria-label="Redes">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><path d="M17 7h.01"/></svg>                            <span class="k-tip" aria-hidden="true">Redes</span>
+            </a>
+                      <a class="k-ico" href="visibilidad.html" aria-label="Visibilidad · se cayó el permiso de Google">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>              <span class="k-badge" aria-hidden="true">!</span>              <span class="k-tip" aria-hidden="true">Visibilidad · se cayó el permiso de Google</span>
+            </a>
+                    <span class="k-sep" aria-hidden="true"></span>
+          <span class="k-empuja" aria-hidden="true"></span>
+          <a class="k-ico k-extra" href="https://kaivastudio.com/" target="_blank" rel="noopener" aria-label="Abrir kaivastudio.com">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c-3 3-3 14 0 17M12 3.5c3 3 3 14 0 17"/></svg>            <span class="k-tip" aria-hidden="true">kaivastudio.com ↗</span>
+          </a>
+
+                    <div class="k-cuenta" id="cuenta">
+            <button type="button" class="k-ico k-cuenta-btn" id="cuentaBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Tu cuenta">
+                            <span class="k-ini">K</span>
+              <span class="k-tip" aria-hidden="true">Tu cuenta</span>
+            </button>
+            <div class="k-cuenta-menu" id="cuentaMenu" role="menu" hidden>
+              <div class="k-cuenta-cab">
+                <b>Kaiva Studio</b>
+                <small>Google: hola@kaivastudio.com</small>
+              </div>
+                              <div class="k-cuenta-nota rota"><i></i>Se cayó el permiso de Google</div>
+                <a class="k-cuenta-item" role="menuitem" href="#">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v5h-5"/></svg>
+                  Volver a conectar                </a>
+                            <form method="post" action="#">
+                <button type="submit" class="k-cuenta-item" role="menuitem">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                  Cerrar sesión
+                </button>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Área de Contenido Principal -->
+        <main class="k-contenido">
+
+        
+                    
+                      <!-- Estás mirando un sitio que no es el tuyo.
+                 El aviso aparece por lo que ESTE informe es, no por cómo se
+                 llama el dominio: ver $esComparacion arriba. Y solo tiene
+                 sentido si hay a dónde volver, así que la salida se pinta
+                 únicamente cuando la persona tiene un sitio propio. -->
+            
+            
+                        
+            <!-- PESTAÑA: RESUMEN -->
+                                        
+<div class="k-v k-v-inicio">
+
+<section class="k-banda" aria-label="Hoy">
+  <div class="k-dia">
+    <div class="k-fecha" aria-hidden="true">19</div>
+    <div class="k-fecha-txt">Lunes,<br>octubre</div>
+  </div>
+  <div class="k-hola">
+        <button type="button" class="k-robot" data-asis-abrir aria-controls="asis-caja" aria-expanded="false" aria-label="Pregúntale al robot de Kaiva">
+      <span class="k-onda" aria-hidden="true"></span><span class="k-onda dos" aria-hidden="true"></span>
+      <canvas id="asis-robot" width="160" height="160" aria-hidden="true"></canvas>
+      <span class="k-tip" aria-hidden="true">Tócalo y pregúntale: «¿cómo vamos?»</span>
+    </button>
+    <h1 class="k-saludo"><span class="gris">Hola.</span><br><span data-saludo-txt>¿Qué hacemos&nbsp;hoy?</span><span class="k-caret" aria-hidden="true"></span></h1>
+  </div>
+  <div class="k-dos">
+      <button type="button" class="k-negra" data-abre="dlg-tarea">Nuevo seguimiento <span class="k-flecha"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></button>
+      <button type="button" class="k-pblanca" data-abre="dlg-cuenta">Nuevo contacto <span class="k-flecha"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M19 8v6M16 11h6"/></svg></span></button>
+  </div>
+</section>
+
+<div class="k-rejilla">
+
+      <link rel="stylesheet" href="assets/recap.css">
+    <section class="k-t k-heroe s8" aria-label="Kaiva Recap">
+      <div class="k-heroe-txt">
+        <div>
+          <div class="k-mono k-heroe-et">Kaiva Recap · últimos 7 días</div>
+          <h2><span class="gris">Buenos días,</span><br>Kaiva.</h2>
+        </div>
+        <button type="button" class="k-blanca" data-kvr-abrir aria-label="Ver el recap de la semana">Ver tu semana <span class="k-flecha"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></span></button>
+      </div>
+            <div class="k-recap-previa" data-kvr-previa="google,visitas,contactos" hidden></div>
+    </section>
+    <script type="application/json" id="kvRecapDatos">{"saludo":"Buenos días","hoy":"lunes 19 de oct","google":{"total":4927,"pct":11,"serie":[{"dia":"lun","fecha":"2026-10-12","v":735},{"dia":"mar","fecha":"2026-10-13","v":629},{"dia":"mié","fecha":"2026-10-14","v":742},{"dia":"jue","fecha":"2026-10-15","v":669},{"dia":"vie","fecha":"2026-10-16","v":702},{"dia":"sáb","fecha":"2026-10-17","v":645},{"dia":"dom","fecha":"2026-10-18","v":805}],"mejor":{"dia":"dom","fecha":"2026-10-18","v":805},"desde":null,"clics":150},"visitas":{"total":812,"pct":1,"serie":[{"dia":"lun","fecha":"2026-10-12","v":111},{"dia":"mar","fecha":"2026-10-13","v":129},{"dia":"mié","fecha":"2026-10-14","v":125},{"dia":"jue","fecha":"2026-10-15","v":105},{"dia":"vie","fecha":"2026-10-16","v":130},{"dia":"sáb","fecha":"2026-10-17","v":106},{"dia":"dom","fecha":"2026-10-18","v":106}],"mejor":{"dia":"vie","fecha":"2026-10-16","v":130,"dia_largo":"viernes"},"desde":null},"redes":[{"red":"instagram","nombre":"Instagram","seguidores":1332,"cambio":18},{"red":"linkedin","nombre":"LinkedIn","seguidores":1620,"cambio":12},{"red":"behance","nombre":"Behance","seguidores":320,"cambio":6}],"contactos":{"n":8,"esperan":5,"personas":[{"iniciales":"CO","nombre":"Café Origen","canal":"Instagram"},{"iniciales":"RA","nombre":"Ruiz Abogados","canal":"Instagram"},{"iniciales":"H\u0026","nombre":"Herrera \u0026 Asociados","canal":"un referido"},{"iniciales":"CD","nombre":"Clínica Dental Sonríe","canal":"Google"},{"iniciales":"MA","nombre":"Mora Arquitectura","canal":"Google"},{"iniciales":"VM","nombre":"Vélez Motos","canal":"LinkedIn"},{"iniciales":"TD","nombre":"Transportes del Norte","canal":"LinkedIn"},{"iniciales":"PA","nombre":"Paula Andrade","canal":"diagnostico"}]},"dinero":{"semana":7000000,"mes":7000000,"por_cobrar":5801600,"mes_nombre":"oct"},"trabajo":{"tareas":4,"hitos":0,"entregas":0},"salud":{"indice":86,"puesto":1,"total":8},"pendientes":[{"titulo":"Avisar a Marea que la entrega se corre","atrasado":true}],"hallazgos":[]}</script>
+    <script src="assets/recap.js" defer></script>
+  
+    <a class="k-t k-dinero s4" href="dinero.html" aria-label="Dinero: en juego $28,5 M, entró en octubre $7 M, por cobrar $5,8 M">
+    <div class="k-cab">
+      <h2 class="k-tit">Dinero</h2>
+      <span class="k-circ"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+    </div>
+        <div class="k-tallos">
+              <div class="k-tallo k-tallo--gris" style="--h: 1; --i: 0">
+          <span class="k-tallo-pil"><span class="s">$</span> <span data-cuenta-sube>28,5 M</span></span>
+          <svg class="k-tallo-cuello" width="22" height="11" viewBox="0 0 22 11" aria-hidden="true"><path d="M0 0H22C15.5 0 13 3.5 13 11H9C9 3.5 6.5 0 0 0Z"/></svg>
+          <i aria-hidden="true"></i>
+          <small>En juego</small>
+        </div>
+              <div class="k-tallo k-tallo--negro" style="--h: 0.457; --i: 1">
+          <span class="k-tallo-pil"><span class="s">$</span> <span data-cuenta-sube>7 M</span></span>
+          <svg class="k-tallo-cuello" width="22" height="11" viewBox="0 0 22 11" aria-hidden="true"><path d="M0 0H22C15.5 0 13 3.5 13 11H9C9 3.5 6.5 0 0 0Z"/></svg>
+          <i aria-hidden="true"></i>
+          <small>Entró en octubre</small>
+        </div>
+              <div class="k-tallo k-tallo--morado" style="--h: 0.427; --i: 2">
+          <span class="k-tallo-pil"><span class="s">$</span> <span data-cuenta-sube>5,8 M</span></span>
+          <svg class="k-tallo-cuello" width="22" height="11" viewBox="0 0 22 11" aria-hidden="true"><path d="M0 0H22C15.5 0 13 3.5 13 11H9C9 3.5 6.5 0 0 0Z"/></svg>
+          <i aria-hidden="true"></i>
+          <small>Por cobrar</small>
+        </div>
+          </div>
+  </a>
+
+    <a class="k-t k-cifra-t s3" href="palabras.html">
+    <span class="k-cifra-et">Te vieron en Google</span>
+    <span class="k-cifra">17.256<small>veces</small></span>
+    <span class="k-cifra-pie"><b>518</b> entraron desde Google · puesto medio <b>8,6</b></span>
+    <svg class="k-spark" width="100%" height="34" viewBox="0 0 200 34" preserveAspectRatio="none" fill="none" stroke="#7A3FC9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" aria-hidden="true"><path d="M2 30 C5.4 30 5.4 29.4 8.8 29.4 C12.2 29.4 12.2 28.3 15.5 28.3 C18.9 28.3 18.9 29.7 22.3 29.7 C25.7 29.7 25.7 29.6 29 29.6 C32.4 29.6 32.4 21.3 35.8 21.3 C39.2 21.3 39.2 27.3 42.6 27.3 C46 27.3 46 21.5 49.3 21.5 C52.7 21.5 52.7 22.6 56.1 22.6 C59.5 22.6 59.5 16.1 62.8 16.1 C66.2 16.1 66.2 25.6 69.6 25.6 C73 25.6 73 24.2 76.3 24.2 C79.7 24.2 79.7 19 83.1 19 C86.5 19 86.5 26 89.9 26 C93.3 26 93.3 21.1 96.6 21.1 C100 21.1 100 11.4 103.4 11.4 C106.8 11.4 106.8 13.7 110.1 13.7 C113.5 13.7 113.5 21.5 116.9 21.5 C120.3 21.5 120.3 22.3 123.7 22.3 C127.1 22.3 127.1 16.4 130.4 16.4 C133.8 16.4 133.8 12.6 137.2 12.6 C140.6 12.6 140.6 16.5 143.9 16.5 C147.3 16.5 147.3 19 150.7 19 C154.1 19 154.1 9.5 157.4 9.5 C160.8 9.5 160.8 17.9 164.2 17.9 C167.6 17.9 167.6 9 171 9 C174.4 9 174.4 14.7 177.7 14.7 C181.1 14.7 181.1 12.1 184.5 12.1 C187.9 12.1 187.9 16.6 191.2 16.6 C194.6 16.6 194.6 4 198 4" vector-effect="non-scaling-stroke"/></svg>  </a>
+  <a class="k-t k-cifra-t s3" href="trafico.html">
+    <span class="k-cifra-et">Visitas al sitio</span>
+    <span class="k-cifra">2.996<small>28 días</small></span>
+    <span class="k-cifra-pie"><span class="k-chip violeta">+54&nbsp;%</span> frente al mes anterior</span>
+    <svg class="k-spark" width="100%" height="34" viewBox="0 0 200 34" preserveAspectRatio="none" fill="none" stroke="#080808" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" aria-hidden="true"><path d="M2 27.6 C5.4 27.6 5.4 30 8.8 30 C12.2 30 12.2 18.7 15.5 18.7 C18.9 18.7 18.9 16.3 22.3 16.3 C25.7 16.3 25.7 23.4 29 23.4 C32.4 23.4 32.4 22.4 35.8 22.4 C39.2 22.4 39.2 18.2 42.6 18.2 C46 18.2 46 18.2 49.3 18.2 C52.7 18.2 52.7 13 56.1 13 C59.5 13 59.5 26.2 62.8 26.2 C66.2 26.2 66.2 22 69.6 22 C73 22 73 18.7 76.3 18.7 C79.7 18.7 79.7 24.8 83.1 24.8 C86.5 24.8 86.5 20.5 89.9 20.5 C93.3 20.5 93.3 10.6 96.6 10.6 C100 10.6 100 11.1 103.4 11.1 C106.8 11.1 106.8 22 110.1 22 C113.5 22 113.5 9.7 116.9 9.7 C120.3 9.7 120.3 10.6 123.7 10.6 C127.1 10.6 127.1 9.2 130.4 9.2 C133.8 9.2 133.8 8.7 137.2 8.7 C140.6 8.7 140.6 7.3 143.9 7.3 C147.3 7.3 147.3 10.6 150.7 10.6 C154.1 10.6 154.1 13 157.4 13 C160.8 13 160.8 4.5 164.2 4.5 C167.6 4.5 167.6 6.4 171 6.4 C174.4 6.4 174.4 15.8 177.7 15.8 C181.1 15.8 181.1 4 184.5 4 C187.9 4 187.9 15.3 191.2 15.3 C194.6 15.3 194.6 15.3 198 15.3" vector-effect="non-scaling-stroke"/></svg>  </a>
+  <a class="k-t k-cifra-t s3" href="visibilidad.html">
+    <span class="k-cifra-et">Salud del sitio</span>
+    <span class="k-cifra">86<small>/100</small></span>
+    <span class="k-cifra-pie"><b>1.º</b> de 8 frente a la competencia</span>
+          <div class="k-barra k-salud"><i style="width: 86%"></i></div>
+      </a>
+  <a class="k-t k-cifra-t s3" href="contactos.html">
+    <span class="k-cifra-et">Contactos · 30 días</span>
+    <span class="k-cifra">9</span>
+    <span class="k-cifra-pie">Ninguno es cliente todavía · 1 el mes anterior</span>
+  </a>
+
+      <div class="k-aviso s12" role="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/></svg>
+      <span><b>Google retiró el permiso de kaivastudio.com:</b> las cifras de Google se quedaron quietas.</span>
+      <a class="k-negra" href="#">Volver a conectar</a>
+    </div>
+  
+      <div class="k-pila s6 k-col-hacer">
+    <section class="k-t k-agenda" id="agenda" aria-labelledby="t-agenda" data-vistas>
+      <div class="k-cab">
+        <h2 class="k-tit" id="t-agenda">Agenda<span class="k-n" data-vista-panel="pendientes" >4</span><span class="k-n" data-vista-panel="hechos" hidden>4</span></h2>
+        <nav class="k-seg k-seg--suave" aria-label="Qué ver en la agenda">
+          <a href="inicio.html" data-vista="pendientes" aria-current="page">Pendientes</a>
+          <a href="inicio.html" data-vista="hechos" >Hechos</a>
+        </nav>
+      </div>
+            <div class="k-scroll">
+        <div class="k-panel" data-vista-panel="pendientes" >
+          <div class="k-semana" role="group" aria-label="Filtrar la agenda por día">
+                          <button type="button" class="k-dia-p k-dia-p--tarde" data-dia-filtro="vencidas" aria-pressed="false" aria-label="Atrasados: 1">
+                <span>atraso</span><b>1</b><i class="k-puntos" aria-hidden="true"></i>
+              </button>
+                                      <button type="button" class="k-dia-p hoy libre" data-dia-filtro="2026-10-19" aria-pressed="false" aria-label="hoy 19: 0 pendientes">
+                <span>hoy</span><b>19</b>
+                <i class="k-puntos" aria-hidden="true"></i>
+              </button>
+                          <button type="button" class="k-dia-p libre" data-dia-filtro="2026-10-20" aria-pressed="false" aria-label="mar 20: 0 pendientes">
+                <span>mar</span><b>20</b>
+                <i class="k-puntos" aria-hidden="true"></i>
+              </button>
+                          <button type="button" class="k-dia-p libre" data-dia-filtro="2026-10-21" aria-pressed="false" aria-label="mié 21: 0 pendientes">
+                <span>mié</span><b>21</b>
+                <i class="k-puntos" aria-hidden="true"></i>
+              </button>
+                          <button type="button" class="k-dia-p libre" data-dia-filtro="2026-10-22" aria-pressed="false" aria-label="jue 22: 0 pendientes">
+                <span>jue</span><b>22</b>
+                <i class="k-puntos" aria-hidden="true"></i>
+              </button>
+                          <button type="button" class="k-dia-p" data-dia-filtro="2026-10-23" aria-pressed="false" aria-label="vie 23: 1 pendiente">
+                <span>vie</span><b>23</b>
+                <i class="k-puntos" aria-hidden="true"><em></em></i>
+              </button>
+                          <button type="button" class="k-dia-p libre" data-dia-filtro="2026-10-24" aria-pressed="false" aria-label="sáb 24: 0 pendientes">
+                <span>sáb</span><b>24</b>
+                <i class="k-puntos" aria-hidden="true"></i>
+              </button>
+                          <button type="button" class="k-dia-p libre" data-dia-filtro="2026-10-25" aria-pressed="false" aria-label="dom 25: 0 pendientes">
+                <span>dom</span><b>25</b>
+                <i class="k-puntos" aria-hidden="true"></i>
+              </button>
+                      </div>
+                      <div class="k-recuerda">
+              <div class="k-recuerda-txt"><span class="k-mono">Cada semana</span><b>Anotar las cifras de LinkedIn (perfil y página) y Behance</b><small>Un minuto · para que la curva de cada red no se quede vacía</small></div>
+              <a href="redes.html#t-redes">Anotar</a>
+            </div>
+                                              <div class="k-grupo k-grupo--vencidas">
+                <div class="k-grupo-cab"><b>Atrasados</b> · 1</div>
+                <div class="k-lista">
+                      <article class="k-fila" data-dia="2026-10-18" data-grupo="vencidas">
+              <form method="POST" class="k-check-form" data-al-momento>
+          <input type="hidden" name="crm_completar_actividad" value="1">
+          <input type="hidden" name="actividad_id" value="1">
+          <input type="hidden" name="origen_tab" value="inicio">
+          <button type="submit" class="k-check" aria-label="Marcar como hecho: Avisar a Marea que la entrega se corre"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+        </form>
+            <div class="k-fila-txt">
+        <b>Avisar a Marea que la entrega se corre</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg>WhatsApp</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Camila Rojas</strong> · Marea Digital</span>
+                      <span class="k-chip mini negro">Alta</span>
+                  </div>
+              </div>
+      <div class="k-fin">
+                  <span class="k-dfecha vencida">ayer</span>
+                          <a class="k-circ" href="https://wa.me/573034445566?text=Hola%20Camila%20Rojas%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Camila Rojas"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+              </div>
+    </article>
+                    </div>
+              </div>
+                          <div class="k-grupo k-grupo--semana">
+                <div class="k-grupo-cab"><b>Esta semana</b> · 1</div>
+                <div class="k-lista">
+                      <article class="k-fila" data-dia="2026-10-23" data-grupo="semana">
+              <form method="POST" class="k-check-form" data-al-momento>
+          <input type="hidden" name="crm_completar_actividad" value="1">
+          <input type="hidden" name="actividad_id" value="4">
+          <input type="hidden" name="origen_tab" value="inicio">
+          <button type="submit" class="k-check" aria-label="Marcar como hecho: Revisar la cotización de Ruta Viajes"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+        </form>
+            <div class="k-fila-txt">
+        <b>Revisar la cotización de Ruta Viajes</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="m15.5 10.5 5-3v9l-5-3"/></svg>Reunión</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Diana Ospina</strong> · Ruta Viajes Group</span>
+                  </div>
+              </div>
+      <div class="k-fin">
+                  <span class="k-dfecha">23 oct</span>
+                          <a class="k-circ" href="https://wa.me/573045556677?text=Hola%20Diana%20Ospina%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Diana Ospina"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+              </div>
+    </article>
+                    </div>
+              </div>
+                          <div class="k-grupo k-grupo--despues">
+                <div class="k-grupo-cab"><b>Más adelante</b> · 1</div>
+                <div class="k-lista">
+                      <article class="k-fila" data-dia="2026-11-03" data-grupo="despues">
+              <form method="POST" class="k-check-form" data-al-momento>
+          <input type="hidden" name="crm_completar_actividad" value="1">
+          <input type="hidden" name="actividad_id" value="6">
+          <input type="hidden" name="origen_tab" value="inicio">
+          <button type="submit" class="k-check" aria-label="Marcar como hecho: Pedir los textos finales del libro"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+        </form>
+            <div class="k-fila-txt">
+        <b>Pedir los textos finales del libro</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Tarea</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Sara Villa</strong> · Editorial Brisa</span>
+                  </div>
+              </div>
+      <div class="k-fin">
+                  <span class="k-dfecha">3 nov</span>
+                          <a class="k-circ" href="https://wa.me/573067778899?text=Hola%20Sara%20Villa%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Sara Villa"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+              </div>
+    </article>
+                    </div>
+              </div>
+                          <div class="k-grupo k-grupo--sin">
+                <div class="k-grupo-cab"><b>Sin fecha</b> · 1</div>
+                <div class="k-lista">
+                      <article class="k-fila" data-dia="" data-grupo="sin">
+              <form method="POST" class="k-check-form" data-al-momento>
+          <input type="hidden" name="crm_completar_actividad" value="1">
+          <input type="hidden" name="actividad_id" value="5">
+          <input type="hidden" name="origen_tab" value="inicio">
+          <button type="submit" class="k-check" aria-label="Marcar como hecho: Mandar el portafolio a Transportes del Norte"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+        </form>
+            <div class="k-fila-txt">
+        <b>Mandar el portafolio a Transportes del Norte</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Tarea</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Mauricio Pérez</strong> · Transportes del Norte</span>
+                  </div>
+              </div>
+      <div class="k-fin">
+                  <form method="POST" class="k-poner-form">
+            <input type="hidden" name="crm_actividad_fecha" value="1">
+            <input type="hidden" name="actividad_id" value="5">
+            <label class="k-poner"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M8 3.5v4M16 3.5v4"/></svg>Poner fecha
+              <input type="date" name="fecha" min="2026-10-19" onchange="this.form.submit()" onclick="try{this.showPicker()}catch(e){}" aria-label="Fecha para «Mandar el portafolio a Transportes del Norte»">
+            </label>
+          </form>
+                          <a class="k-circ" href="https://wa.me/573056667788?text=Hola%20Mauricio%20P%C3%A9rez%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Mauricio Pérez"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+              </div>
+    </article>
+                    </div>
+              </div>
+                                <p class="k-vacio k-dia-vacio" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg> Nada pendiente ese día.</p>
+        </div>
+        <div class="k-panel" data-vista-panel="hechos" hidden>
+                      <div class="k-grupo">
+              <div class="k-lista">    <article class="k-fila hecha" data-dia="2026-10-19" data-grupo="hecho">
+              <span class="k-check" aria-label="Hecho"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+            <div class="k-fila-txt">
+        <b>Llamar a ALBA por la propuesta</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.8a1.8 1.8 0 0 1-2 1.8A17.6 17.6 0 0 1 2.9 5 1.8 1.8 0 0 1 4.7 3h2.8a1.8 1.8 0 0 1 1.8 1.5c.1.9.4 1.7.7 2.5a1.8 1.8 0 0 1-.4 1.9l-1.2 1.2a14 14 0 0 0 5.5 5.5l1.2-1.2a1.8 1.8 0 0 1 1.9-.4c.8.3 1.6.6 2.5.7a1.8 1.8 0 0 1 1.5 1.8z"/></svg>Llamada</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Ricardo Gómez</strong> · ALBA</span>
+                  </div>
+                  <div class="k-nota">Preguntar si el presupuesto incluye la página de cursos.</div>
+              </div>
+      <div class="k-fin">
+                  <span class="k-dfecha">hecho hoy</span>
+                      </div>
+    </article>
+        <article class="k-fila hecha" data-dia="2026-10-19" data-grupo="hecho">
+              <span class="k-check" aria-label="Hecho"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+            <div class="k-fila-txt">
+        <b>Responder a Laura Martínez</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m4.5 7 7.5 6 7.5-6"/></svg>Correo</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Laura Martínez</strong> · Clínica Dental Sonríe</span>
+                  </div>
+              </div>
+      <div class="k-fin">
+                  <span class="k-dfecha">hecho hoy</span>
+                      </div>
+    </article>
+        <article class="k-fila hecha" data-dia="2026-10-18" data-grupo="hecho">
+              <span class="k-check" aria-label="Hecho"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+            <div class="k-fila-txt">
+        <b>Publicar el carrusel de la semana</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Tarea</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Camila Rojas</strong> · Marea Digital</span>
+                  </div>
+              </div>
+      <div class="k-fin">
+                  <span class="k-dfecha">hecho ayer</span>
+                      </div>
+    </article>
+        <article class="k-fila hecha" data-dia="" data-grupo="hecho">
+              <span class="k-check" aria-label="Hecho"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+            <div class="k-fila-txt">
+        <b>Primer contacto por el formulario</b>
+        <div class="k-meta">
+          <span class="k-tipo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5M9 13h6M9 16.5h4"/></svg>Nota</span>
+          <span aria-hidden="true">·</span>
+          <span><strong>Laura Martínez</strong> · Clínica Dental Sonríe</span>
+                  </div>
+                  <div class="k-nota">Quiere cambiar la web antes de diciembre.</div>
+              </div>
+      <div class="k-fin">
+                  <span class="k-dfecha">hecho 17 oct</span>
+                      </div>
+    </article>
+    </div>
+            </div>
+                  </div>
+      </div>
+    </section>
+          <section class="k-t k-bitacora" aria-labelledby="t-bitacora">
+        <div class="k-cab"><h2 class="k-tit" id="t-bitacora">Bitácora</h2></div>
+        <div class="k-lista" data-paginas="3">
+                  <button type="button" class="k-bit" data-abre="dlg-bit-0">
+            <span class="k-chip">Competencia</span>
+            <span class="k-bit-txt"><b>Prisma lanzó web nueva</b><small>Claude · 9 oct</small><span class="k-bit-res">Diseño oscuro con mucho movimiento; su velocidad bajó.</span></span>
+            <span class="k-mas" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+                  <button type="button" class="k-bit" data-abre="dlg-bit-1">
+            <span class="k-chip">Nota</span>
+            <span class="k-bit-txt"><b>Revisar precios de mantenimiento</b><small>Equipo · 10 oct</small><span class="k-bit-res">Comparar con lo que cobra la competencia antes de noviembre.</span></span>
+            <span class="k-mas" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+                  <button type="button" class="k-bit" data-abre="dlg-bit-2">
+            <span class="k-chip">Análisis</span>
+            <span class="k-bit-txt"><b>La web carga más rápido en celular</b><small>Claude · 11 oct</small><span class="k-bit-res">El índice de imagen subió tras comprimir las fotos del portafolio.</span></span>
+            <span class="k-mas" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+                  <button type="button" class="k-bit" data-abre="dlg-bit-3">
+            <span class="k-chip violeta">Del día</span>
+            <span class="k-bit-txt"><b>Lunes: dos contactos esperan respuesta</b><small>Claude · hoy</small><span class="k-bit-res">Laura Martínez lleva más de un día sin respuesta. La entrega de Marea pasó su fecha: conviene avisarles hoy.</span></span>
+            <span class="k-mas" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+                  <button type="button" class="k-bit" data-abre="dlg-bit-4">
+            <span class="k-chip">Decisión</span>
+            <span class="k-bit-txt"><b>Las propuestas salen en PDF y por enlace</b><small>Equipo · 17 oct</small><span class="k-bit-res">Se manda el enlace privado y el PDF queda de respaldo.</span></span>
+            <span class="k-mas" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+                  <button type="button" class="k-bit" data-abre="dlg-bit-5">
+            <span class="k-chip">Competencia</span>
+            <span class="k-bit-txt"><b>Un competidor subió al puesto 2</b><small>Claude · 15 oct</small><span class="k-bit-res">Mejoró su velocidad en celular. Vale la pena revisar la nuestra.</span></span>
+            <span class="k-mas" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+                </div>
+      </section>
+              <dialog id="dlg-bit-0" class="k-dlg" aria-labelledby="dlg-bit-0-t">
+          <header class="k-dlg-cab"><div><h2 id="dlg-bit-0-t">Prisma lanzó web nueva</h2><p>Claude · 9 oct · Competencia</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>          <p class="k-bit-dlg">Diseño oscuro con mucho movimiento; su velocidad bajó.</p>
+        </dialog>
+              <dialog id="dlg-bit-1" class="k-dlg" aria-labelledby="dlg-bit-1-t">
+          <header class="k-dlg-cab"><div><h2 id="dlg-bit-1-t">Revisar precios de mantenimiento</h2><p>Equipo · 10 oct · Nota</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>          <p class="k-bit-dlg">Comparar con lo que cobra la competencia antes de noviembre.</p>
+        </dialog>
+              <dialog id="dlg-bit-2" class="k-dlg" aria-labelledby="dlg-bit-2-t">
+          <header class="k-dlg-cab"><div><h2 id="dlg-bit-2-t">La web carga más rápido en celular</h2><p>Claude · 11 oct · Análisis</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>          <p class="k-bit-dlg">El índice de imagen subió tras comprimir las fotos del portafolio.</p>
+        </dialog>
+              <dialog id="dlg-bit-3" class="k-dlg" aria-labelledby="dlg-bit-3-t">
+          <header class="k-dlg-cab"><div><h2 id="dlg-bit-3-t">Lunes: dos contactos esperan respuesta</h2><p>Claude · hoy · Del día</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>          <p class="k-bit-dlg">Laura Martínez lleva más de un día sin respuesta. La entrega de Marea pasó su fecha: conviene avisarles hoy.</p>
+        </dialog>
+              <dialog id="dlg-bit-4" class="k-dlg" aria-labelledby="dlg-bit-4-t">
+          <header class="k-dlg-cab"><div><h2 id="dlg-bit-4-t">Las propuestas salen en PDF y por enlace</h2><p>Equipo · 17 oct · Decisión</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>          <p class="k-bit-dlg">Se manda el enlace privado y el PDF queda de respaldo.</p>
+        </dialog>
+              <dialog id="dlg-bit-5" class="k-dlg" aria-labelledby="dlg-bit-5-t">
+          <header class="k-dlg-cab"><div><h2 id="dlg-bit-5-t">Un competidor subió al puesto 2</h2><p>Claude · 15 oct · Competencia</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>          <p class="k-bit-dlg">Mejoró su velocidad en celular. Vale la pena revisar la nuestra.</p>
+        </dialog>
+            </div>
+
+  <div class="k-pila s6 k-col-llega">
+    <section class="k-t" aria-labelledby="t-leads">
+      <div class="k-cab">
+        <h2 class="k-tit" id="t-leads">Contactos nuevos<span class="k-n">13</span></h2>
+      </div>
+                      <div class="k-lista" data-paginas="3">
+                      <div class="k-fila2">
+              <span class="k-av k-av--morado">VR</span>
+              <div class="k-fila-txt">
+                <a href="contacto-9.html"><b>Valentina Ríos</b></a>
+                                  <div class="k-meta"><span class="k-chip mini suave">Sin responder · 9 h</span></div>
+                                <div class="k-meta">Instagram · Café Origen</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573101110001?text=Hola%20Valentina%20R%C3%ADos%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Valentina Ríos"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av">AR</span>
+              <div class="k-fila-txt">
+                <a href="contacto-2.html"><b>Andrés Ruiz</b></a>
+                                <div class="k-meta">Instagram · Ruiz Abogados</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573012223344?text=Hola%20Andr%C3%A9s%20Ruiz%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Andrés Ruiz"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av k-av--morado">TH</span>
+              <div class="k-fila-txt">
+                <a href="contacto-10.html"><b>Tomás Herrera</b></a>
+                                  <div class="k-meta"><span class="k-chip mini negro">Sin responder · 33 h</span></div>
+                                <div class="k-meta">Referido · Herrera &amp; Asociados</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573101110002?text=Hola%20Tom%C3%A1s%20Herrera%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Tomás Herrera"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av k-av--morado">LM</span>
+              <div class="k-fila-txt">
+                <a href="contacto-1.html"><b>Laura Martínez</b></a>
+                                <div class="k-meta">Google · Clínica Dental Sonríe</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573001112233?text=Hola%20Laura%20Mart%C3%ADnez%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Laura Martínez"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av k-av--morado">LF</span>
+              <div class="k-fila-txt">
+                <a href="contacto-11.html"><b>Luisa Fernanda Mora</b></a>
+                                  <div class="k-meta"><span class="k-chip mini negro">Sin responder · 3 días</span></div>
+                                <div class="k-meta">Google · Mora Arquitectura</div>
+              </div>
+                              <a class="k-circ" href="mailto:luisa@moraarq.com" aria-label="Correo a Luisa Fernanda Mora"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m4.5 7 7.5 6 7.5-6"/></svg><span class="k-tip" aria-hidden="true">Correo</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av k-av--morado">SV</span>
+              <div class="k-fila-txt">
+                <a href="contacto-12.html"><b>Santiago Vélez</b></a>
+                                <div class="k-meta">LinkedIn · Vélez Motos</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573101110004?text=Hola%20Santiago%20V%C3%A9lez%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Santiago Vélez"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av">MP</span>
+              <div class="k-fila-txt">
+                <a href="contacto-7.html"><b>Mauricio Pérez</b></a>
+                                  <div class="k-meta"><span class="k-chip mini negro">Sin responder · 5 días</span></div>
+                                <div class="k-meta">LinkedIn · Transportes del Norte</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573056667788?text=Hola%20Mauricio%20P%C3%A9rez%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Mauricio Pérez"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av k-av--morado">PA</span>
+              <div class="k-fila-txt">
+                <a href="contacto-13.html"><b>Paula Andrade</b></a>
+                                  <div class="k-meta"><span class="k-chip mini negro">Sin responder · 6 días</span></div>
+                                <div class="k-meta">Diagnóstico · paula@correo.com</div>
+              </div>
+                              <a class="k-circ" href="mailto:paula@correo.com" aria-label="Correo a Paula Andrade"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m4.5 7 7.5 6 7.5-6"/></svg><span class="k-tip" aria-hidden="true">Correo</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av">RG</span>
+              <div class="k-fila-txt">
+                <a href="contacto-3.html"><b>Ricardo Gómez</b></a>
+                                <div class="k-meta">Referido · ALBA</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573023334455?text=Hola%20Ricardo%20G%C3%B3mez%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Ricardo Gómez"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av">JC</span>
+              <div class="k-fila-txt">
+                <a href="contacto-6.html"><b>Juliana Cárdenas</b></a>
+                                <div class="k-meta">Diagnóstico · juliana@correo.com</div>
+              </div>
+                              <a class="k-circ" href="mailto:juliana@correo.com" aria-label="Correo a Juliana Cárdenas"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m4.5 7 7.5 6 7.5-6"/></svg><span class="k-tip" aria-hidden="true">Correo</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av">CR</span>
+              <div class="k-fila-txt">
+                <a href="contacto-4.html"><b>Camila Rojas</b></a>
+                                <div class="k-meta">LinkedIn · Marea Digital</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573034445566?text=Hola%20Camila%20Rojas%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Camila Rojas"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av">DO</span>
+              <div class="k-fila-txt">
+                <a href="contacto-5.html"><b>Diana Ospina</b></a>
+                                <div class="k-meta">Behance · Ruta Viajes Group</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573045556677?text=Hola%20Diana%20Ospina%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Diana Ospina"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                      <div class="k-fila2">
+              <span class="k-av">SV</span>
+              <div class="k-fila-txt">
+                <a href="contacto-8.html"><b>Sara Villa</b></a>
+                                <div class="k-meta">Referido · Editorial Brisa</div>
+              </div>
+                              <a class="k-circ" href="https://wa.me/573067778899?text=Hola%20Sara%20Villa%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener" aria-label="WhatsApp a Sara Villa"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg><span class="k-tip" aria-hidden="true">WhatsApp</span></a>
+                          </div>
+                  </div>
+          </section>
+
+          <section class="k-t" aria-labelledby="t-entregas">
+        <div class="k-cab">
+          <h2 class="k-tit" id="t-entregas">Entregas<span class="k-n">4</span></h2>
+          <a class="k-enlace" href="proyectos.html">Proyectos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="k-lista k-entregas" data-paginas="3">
+                      <a class="k-fila2 k-entrega" href="proyectos.html#p1">
+              <div class="k-entrega-cab"><b>Web Marea</b><span class="k-dfecha vencida">17 oct</span></div>
+              <div class="k-meta">Marea Digital · 75&nbsp;% hecho</div>
+              <div class="k-barra"><i style="width: 75%; animation-delay: 0ms"></i></div>            </a>
+                      <a class="k-fila2 k-entrega" href="proyectos.html#p3">
+              <div class="k-entrega-cab"><b>Plataforma</b><span class="k-dfecha">28 oct</span></div>
+              <div class="k-meta">Ruta Viajes Group · 33&nbsp;% hecho</div>
+              <div class="k-barra"><i style="width: 33%; animation-delay: 120ms"></i></div>            </a>
+                      <a class="k-fila2 k-entrega" href="proyectos.html#p2">
+              <div class="k-entrega-cab"><b>Libro Brisa</b><span class="k-dfecha hoy">hoy</span></div>
+              <div class="k-meta">Editorial Brisa · 50&nbsp;% hecho</div>
+              <div class="k-barra"><i style="width: 50%; animation-delay: 240ms"></i></div>            </a>
+                      <a class="k-fila2 k-entrega" href="proyectos.html#p6">
+              <div class="k-entrega-cab"><b>Mantenimiento web</b><span class="k-dfecha">31 oct</span></div>
+              <div class="k-meta">Marea Digital · 67&nbsp;% hecho</div>
+              <div class="k-barra"><i style="width: 67%; animation-delay: 360ms"></i></div>            </a>
+                  </div>
+      </section>
+          </div>
+
+</div>
+</div>
+
+  <dialog id="dlg-tarea" class="k-dlg" aria-labelledby="dlg-tarea-t">
+    <header class="k-dlg-cab"><div><h2 id="dlg-tarea-t">Nuevo seguimiento</h2><p>Una llamada, un mensaje o algo que no se puede olvidar.</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>    <form method="POST">
+      <input type="hidden" name="crm_nueva_actividad" value="1">
+      <input type="hidden" name="origen_tab" value="inicio">
+              <div class="k-campos">
+          <label class="k-campo todo"><span class="k-et">Qué hay que hacer</span>
+            <input type="text" name="titulo" required class="k-in" placeholder="Enviar la propuesta en PDF">
+          </label>
+          <label class="k-campo todo"><span class="k-et">Con quién</span>
+            <select name="cuenta_id" required class="k-in"><option value="4">Camila Rojas — Marea Digital</option><option value="9">Valentina Ríos — Café Origen</option><option value="10">Tomás Herrera — Herrera &amp; Asociados</option><option value="11">Luisa Fernanda Mora — Mora Arquitectura</option><option value="12">Santiago Vélez — Vélez Motos</option><option value="13">Paula Andrade</option><option value="1">Laura Martínez — Clínica Dental Sonríe</option><option value="2">Andrés Ruiz — Ruiz Abogados</option><option value="3">Ricardo Gómez — ALBA</option><option value="5">Diana Ospina — Ruta Viajes Group</option><option value="6">Juliana Cárdenas</option><option value="7">Mauricio Pérez — Transportes del Norte</option><option value="8">Sara Villa — Editorial Brisa</option></select>
+          </label>
+          <fieldset class="k-campo todo"><legend class="k-et">Cómo</legend>
+            <div class="k-opciones"><label class="k-op"><input type="radio" name="tipo" value="whatsapp"><span>WhatsApp</span></label><label class="k-op"><input type="radio" name="tipo" value="llamada"><span>Llamada</span></label><label class="k-op"><input type="radio" name="tipo" value="reunion"><span>Reunión</span></label><label class="k-op"><input type="radio" name="tipo" value="email"><span>Correo</span></label><label class="k-op"><input type="radio" name="tipo" value="tarea" checked><span>Tarea</span></label><label class="k-op"><input type="radio" name="tipo" value="nota"><span>Nota</span></label></div>          </fieldset>
+          <fieldset class="k-campo"><legend class="k-et">Prioridad</legend>
+            <div class="k-opciones"><label class="k-op"><input type="radio" name="prioridad" value="normal" checked><span>Normal</span></label><label class="k-op"><input type="radio" name="prioridad" value="media"><span>Media</span></label><label class="k-op"><input type="radio" name="prioridad" value="alta"><span>Alta</span></label></div>          </fieldset>
+          <label class="k-campo"><span class="k-et">Para cuándo</span>
+            <input type="date" name="fecha_programada" value="2026-10-19" class="k-in">
+          </label>
+          <label class="k-campo todo"><span class="k-et">Notas <small>opcional</small></span>
+            <textarea name="descripcion" rows="3" class="k-in" placeholder="Lo que se habló, el presupuesto, lo que falta…"></textarea>
+          </label>
+        </div>
+        <div class="k-pie-dlg">
+          <button type="button" class="k-btn-sec" data-cierra>Cancelar</button>
+          <button type="submit" class="k-negra"><span>Guardar seguimiento</span><span class="k-flecha k-flecha--quieta"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></button>        </div>
+          </form>
+  </dialog>
+  <dialog id="dlg-cuenta" class="k-dlg" aria-labelledby="dlg-cuenta-t">
+    <header class="k-dlg-cab"><div><h2 id="dlg-cuenta-t">Nuevo contacto</h2><p>Una persona o una empresa con la que hay conversación.</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>    <form method="POST">
+      <input type="hidden" name="crm_nueva_cuenta" value="1">
+      <input type="hidden" name="origen_tab" value="inicio">
+            <div class="k-campos">
+        <label class="k-campo"><span class="k-et">Nombre</span>
+          <input type="text" name="nombre" required class="k-in" placeholder="Carlos Gómez">
+        </label>
+        <label class="k-campo"><span class="k-et">Empresa <small>opcional</small></span>
+          <input type="text" name="empresa" class="k-in" placeholder="Inversiones del Caribe">
+        </label>
+        <label class="k-campo"><span class="k-et">WhatsApp</span>
+          <input type="tel" name="telefono" class="k-in" placeholder="+57 300 123 4567">
+        </label>
+        <label class="k-campo"><span class="k-et">Correo</span>
+          <input type="email" name="email" class="k-in" placeholder="carlos@empresa.com">
+        </label>
+        <label class="k-campo"><span class="k-et">Sitio web</span>
+          <input type="text" name="dominio" class="k-in" placeholder="empresa.com">
+        </label>
+        <label class="k-campo"><span class="k-et">Cómo llegó</span>
+                    <select name="origen" class="k-in">
+            <option value="referido">Referido</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="instagram">Instagram</option>
+            <option value="behance">Behance</option>
+            <option value="landing">Sitio web</option>
+            <option value="manual" selected>Otro / a mano</option>
+          </select>
+        </label>
+        <fieldset class="k-campo todo"><legend class="k-et">Estado</legend>
+          <div class="k-tarjetas">
+                          <label class="k-tarjeta"><input type="radio" name="estado" value="lead" checked><span><b>Lead</b><small>Aún no hemos hablado</small></span></label>
+                          <label class="k-tarjeta"><input type="radio" name="estado" value="prospecto"><span><b>Prospecto</b><small>Hay conversación</small></span></label>
+                          <label class="k-tarjeta"><input type="radio" name="estado" value="cliente"><span><b>Cliente</b><small>Ya trabajamos juntos</small></span></label>
+                      </div>
+        </fieldset>
+      </div>
+      <div class="k-pie-dlg">
+        <button type="button" class="k-btn-sec" data-cierra>Cancelar</button>
+        <button type="submit" class="k-negra"><span>Guardar contacto</span><span class="k-flecha k-flecha--quieta"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></button>      </div>
+    </form>
+  </dialog>
+
+            
+                                                    <script>
+(function () {
+  /* — Diálogos: [data-abre="id"] abre, [data-cierra] o clic fuera cierra — */
+  document.addEventListener('click', function (e) {
+    var abre = e.target.closest('[data-abre]');
+    if (abre) {
+      var d = document.getElementById(abre.getAttribute('data-abre'));
+      if (d && d.showModal) {
+        var padre = abre.closest('dialog');
+        if (padre && padre !== d) padre.close();
+        // Un botón puede preseleccionar valores del formulario: data-pre-campo="valor".
+        Array.prototype.forEach.call(abre.attributes, function (a) {
+          if (a.name.indexOf('data-pre-') === 0) {
+            var campo = a.name.slice(9);
+            // Un grupo de radios (las píldoras de las ventanas) se marca por su valor.
+            var radio = d.querySelector('input[type="radio"][name="' + campo + '"][value="' + a.value + '"]');
+            if (radio) { radio.checked = true; return; }
+            var c = d.querySelector('[name="' + campo + '"]');
+            if (c) c.value = a.value;
+          }
+        });
+        d.showModal();
+        var primero = d.querySelector('input:not([type=hidden]), select, textarea');
+        if (primero) primero.focus();
+      }
+      return;
+    }
+    if (e.target.closest('[data-cierra]') && !e.target.closest('[data-abre]')) {
+      var dlg = e.target.closest('dialog');
+      if (dlg) dlg.close();
+      return;
+    }
+    if (e.target.tagName === 'DIALOG' && e.target.open) {
+      var r = e.target.getBoundingClientRect();
+      var dentro = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!dentro) e.target.close();
+    }
+  });
+
+  /* — Analizar un dominio sin salir de la vista: [data-analizar="dominio"] —
+     Usa el mismo análisis (y la misma pantalla de espera) que el botón de
+     recargar de la barra; al terminar recarga y la fila ya trae su índice. */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-analizar]');
+    if (!b || typeof window.ejecutarAnalisis !== 'function') return;
+    window.ejecutarAnalisis(b.getAttribute('data-analizar'));
+  });
+
+  /* — Elegir un trato ganado rellena cliente y nombre del proyecto — */
+  document.addEventListener('change', function (e) {
+    var sel = e.target.closest('[data-rellena-proyecto]');
+    if (!sel) return;
+    var op = sel.options[sel.selectedIndex];
+    var f = sel.form;
+    if (op && op.dataset.cuenta) f.querySelector('[name="cuenta_id"]').value = op.dataset.cuenta;
+    var n = f.querySelector('[name="nombre"]');
+    if (op && op.dataset.nombre && !n.value) n.value = op.dataset.nombre;
+  });
+
+  /* — Un comprobante que pesa más de lo que PHP acepta (2 MB) se reduce en el
+       navegador antes de subirlo: las capturas del celular a veces pesan 3–4 MB
+       y no hace falta esa resolución para leer un comprobante. Los PDF no se
+       tocan. — */
+  document.addEventListener('change', function (e) {
+    var inp = e.target;
+    if (!inp.matches || !inp.matches('input[type="file"][name="comprobante"]')) return;
+    var f = inp.files && inp.files[0];
+    if (!f) return;
+    var autoenviar = inp.hasAttribute('data-autoenviar');
+    if (!/^image\//.test(f.type) || f.size <= 1800000) { if (autoenviar) inp.form.submit(); return; }
+    var img = new Image();
+    img.onload = function () {
+      var lado = 1800, k = Math.min(1, lado / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function (b) {
+        var dt = new DataTransfer();
+        dt.items.add(new File([b], f.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
+        inp.files = dt.files;
+        if (autoenviar) inp.form.submit();
+      }, 'image/jpeg', 0.85);
+    };
+    img.src = URL.createObjectURL(f);
+  });
+
+  /* — Adjuntar en una caja .k-suelta: se ve el nombre del archivo elegido — */
+  document.addEventListener('change', function (e) {
+    var inp = e.target;
+    if (!inp.matches || !inp.matches('.k-suelta input[type="file"]')) return;
+    var b = inp.closest('.k-suelta').querySelector('[data-suelta-nombre]');
+    if (b && inp.files && inp.files[0]) b.textContent = inp.files[0].name;
+  });
+
+  /* — Vistas dentro de la misma página: [data-vistas] agrupa, a[data-vista]
+       elige y [data-vista-panel="a b"] dice en qué vistas se ve cada pieza.
+       Pendientes/Hechos, Tablero/Contactos y los filtros de Finanzas ya
+       vienen todos en la página: cambiar es mostrar y esconder, al instante
+       y sin pedir nada al servidor. El enlace sigue siendo un enlace (?ver=,
+       ?modo=): la dirección se actualiza para que recargar o compartir caiga
+       en la misma vista, y sin guion funciona como antes. — */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-vista]');
+    if (!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var grupo = a.closest('[data-vistas]');
+    if (!grupo) return;
+    e.preventDefault();
+    var v = a.getAttribute('data-vista');
+    // Solo lo de este grupo: un grupo dentro de otro (los filtros de Dinero
+    // dentro de Ventas) se maneja solo.
+    var mio = function (el) { return el.parentElement.closest('[data-vistas]') === grupo || el.closest('[data-vistas]') === grupo; };
+    grupo.querySelectorAll('a[data-vista]').forEach(function (x) {
+      if (x.closest('[data-vistas]') !== grupo) return;
+      if (x.getAttribute('data-vista') === v) x.setAttribute('aria-current', 'page');
+      else x.removeAttribute('aria-current');
+    });
+    grupo.querySelectorAll('[data-vista-panel]').forEach(function (p) {
+      if (!mio(p)) return;
+      p.hidden = p.getAttribute('data-vista-panel').split(' ').indexOf(v) < 0;
+    });
+    try { history.replaceState(history.state, '', a.href); } catch (err) {}
+  });
+
+  /* — Ordenar sin recargar: [data-orden-grupo] agrupa, [data-ordenar="clave"]
+       ordena de mayor a menor los hijos de [data-ordenable] por su
+       atributo data-k-clave. (Publicaciones de Instagram: recientes, más
+       alcance, más interacción.) — */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-ordenar]');
+    if (!a) return;
+    var g = a.closest('[data-orden-grupo]');
+    var caja = g && g.querySelector('[data-ordenable]');
+    if (!caja) return;
+    e.preventDefault();
+    var k = 'data-k-' + a.getAttribute('data-ordenar');
+    var num = function (el) { var v = parseFloat(el.getAttribute(k)); return isNaN(v) ? -1 : v; };
+    Array.prototype.slice.call(caja.children)
+      .sort(function (x, y) { return num(y) - num(x); })
+      .forEach(function (c) { caja.appendChild(c); });
+    g.querySelectorAll('[data-ordenar]').forEach(function (x) {
+      if (x === a) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current');
+    });
+    caja.scrollIntoView({ block: 'nearest' });
+  });
+
+  /* — Buscar mientras se escribe: form[data-filtra="selector de filas"] —
+       Las filas ya están en la página; se esconden las que no coinciden
+       (sin mayúsculas ni tildes). Enter no recarga: ya está filtrado. — */
+  function sinTildes(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function filtrar(f) {
+    var caja = f.closest('section, details, .os-card') || document;
+    var inp = f.querySelector('input[type="search"]');
+    var q = sinTildes((inp && inp.value || '').trim());
+    var n = 0;
+    caja.querySelectorAll(f.getAttribute('data-filtra')).forEach(function (fila) {
+      var ve = q === '' || sinTildes(fila.textContent).indexOf(q) >= 0;
+      fila.hidden = !ve;
+      if (ve) n++;
+    });
+    var cuenta = caja.querySelector('[data-filtra-n]');
+    if (cuenta) cuenta.textContent = n;
+    var vacio = caja.querySelector('[data-filtra-vacio]');
+    if (vacio) vacio.hidden = n > 0;
+  }
+  document.addEventListener('input', function (e) {
+    var f = e.target.form;
+    if (f && f.hasAttribute('data-filtra')) filtrar(f);
+  });
+  document.addEventListener('submit', function (e) {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-filtra')) { e.preventDefault(); filtrar(e.target); }
+  });
+
+  /* — Marcar un seguimiento como hecho, al momento: form[data-al-momento] —
+       Antes era un POST con recarga entera: un segundo de espera y la agenda
+       volvía arriba del todo, justo cuando se estaba repasando la lista. Ahora
+       la fila se va en el acto y el guardado viaja por detrás. Si el servidor
+       no confirma, se recarga la página para enseñar lo que de verdad quedó. */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f.matches || !f.matches('form[data-al-momento]') || !window.fetch) return;
+    e.preventDefault();
+    fetch(f.getAttribute('action') || location.href, {
+      method: 'POST', body: new FormData(f), credentials: 'same-origin', redirect: 'manual'
+    }).then(function (r) {
+      if (!(r.type === 'opaqueredirect' || r.ok)) throw new Error('no guardó');
+    }).catch(function () { location.reload(); });
+
+    var fila = f.closest('.os-tarea, .k-fila');
+    if (!fila) return;
+    var grupo = fila.closest('.os-grupo-t, .k-grupo');
+    var panel = fila.closest('[data-vista-panel]');
+    var urgente = grupo && /--(vencidas|hoy)\b/.test(grupo.className);
+    fila.classList.add('os-saliendo', 'saliendo');
+    setTimeout(function () {
+      fila.remove();
+      if (grupo) {
+        var quedan = grupo.querySelectorAll('.os-tarea, .k-fila').length;
+        var cab = grupo.querySelector('.os-grupo-t-cab, .k-grupo-cab');
+        if (!quedan) grupo.remove();
+        else if (cab && cab.lastChild) cab.lastChild.nodeValue = ' · ' + quedan;
+      }
+      if (panel) {
+        var total = panel.querySelectorAll('.os-tarea:not(.os-recordatorio), .k-fila').length;
+        var n = document.querySelector('#agenda [data-vista-panel="' + panel.getAttribute('data-vista-panel') + '"]:is(.n, .k-n)');
+        if (n) n.textContent = total;
+        if (!total) {
+          var p = document.createElement('p');
+          p.className = 'os-al-dia k-vacio';
+          p.textContent = 'Todo al día.';
+          panel.appendChild(p);
+        }
+      }
+      // El aviso de la barra de íconos: seguimientos de hoy o atrasados.
+      var aviso = urgente && document.querySelector('.k-badge-hoy');
+      if (aviso) {
+        var k = parseInt(aviso.textContent, 10) - 1;
+        if (k > 0) aviso.textContent = k; else aviso.remove();
+      }
+    }, 280);
+  });
+
+  /* — Formularios que tardan (conectar o leer Instagram): el botón dice que
+       está trabajando y no se puede pulsar dos veces. Sin esto el clic no
+       daba ninguna señal durante 10-15 s y parecía que no hacía nada. — */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f.matches || !f.matches('form[data-esperando]')) return;
+    var b = f.querySelector('button[type="submit"], button:not([type])');
+    if (!b) return;
+    if (b.disabled) { e.preventDefault(); return; }
+    var et = b.querySelector('span') || b;
+    et.textContent = f.getAttribute('data-esperando');
+    setTimeout(function () { b.disabled = true; }, 0);
+  });
+
+  /* — Copiar al portapapeles: [data-copia="texto"] — */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copia-os]');
+    if (!b) return;
+    var txt = b.getAttribute('data-copia-os');
+    var et = b.querySelector('span');
+    var antes = et ? et.textContent : '';
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject())
+      .then(function () { if (et) et.textContent = 'Copiado'; })
+      .catch(function () { if (et) et.textContent = 'No se pudo copiar'; })
+      .finally(function () { setTimeout(function () { if (et) et.textContent = antes; }, 1800); });
+  });
+
+  /* — Tablero: arrastrar un trato a otra columna lo mueve de etapa —
+     No llama a ninguna API nueva: pone la etapa en el desplegable de la
+     propia tarjeta y envía su formulario, que es lo mismo que haría la
+     persona a mano. Si algo falla, falla igual que el desplegable. */
+  /* (Piel nueva, 2026-10-19: .k-kanban / .k-col / .k-trato, en k-ventas.css.) */
+  var tablero = document.querySelector('.k-v-ventas .k-kanban');
+  if (tablero) {
+    var arrastrado = null;
+    tablero.addEventListener('dragstart', function (e) {
+      var t = e.target.closest('.k-trato');
+      if (!t) return;
+      arrastrado = t;
+      t.classList.add('arrastrando');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', t.dataset.id || '');
+    });
+    tablero.addEventListener('dragend', function () {
+      if (arrastrado) arrastrado.classList.remove('arrastrando');
+      arrastrado = null;
+      tablero.querySelectorAll('.destino').forEach(function (c) { c.classList.remove('destino'); });
+    });
+    tablero.addEventListener('dragover', function (e) {
+      var col = e.target.closest('.k-col');
+      if (!col || !arrastrado) return;
+      e.preventDefault();
+      tablero.querySelectorAll('.destino').forEach(function (c) { if (c !== col) c.classList.remove('destino'); });
+      col.classList.add('destino');
+    });
+    tablero.addEventListener('drop', function (e) {
+      var col = e.target.closest('.k-col');
+      if (!col || !arrastrado) return;
+      e.preventDefault();
+      var etapa = col.dataset.etapa;
+      var sel = arrastrado.querySelector('select[name="nueva_etapa"]');
+      if (!sel || sel.value === etapa) return;
+      var lista = col.querySelector('.k-col-lista');
+      var vacia = lista.querySelector('.k-vacia');
+      if (vacia) vacia.remove();
+      lista.appendChild(arrastrado);
+      sel.value = etapa;
+      sel.form.submit();
+    });
+  }
+
+  /* — Lista de verificación del lanzamiento: se recuerda en este navegador —
+     Es una ayuda de memoria personal, no un registro del equipo; por eso
+     vive en localStorage y no en la base de datos. */
+  document.querySelectorAll('[data-check-id]').forEach(function (c) {
+    var k = 'kvos-check-' + c.getAttribute('data-check-id');
+    try { c.checked = localStorage.getItem(k) === '1'; } catch (err) {}
+    c.addEventListener('change', function () {
+      try { localStorage.setItem(k, c.checked ? '1' : '0'); } catch (err) {}
+      contarFases();
+    });
+  });
+  function contarFases() {
+    document.querySelectorAll('[data-fase]').forEach(function (f) {
+      var t = f.querySelectorAll('[data-check-id]').length;
+      var h = f.querySelectorAll('[data-check-id]:checked').length;
+      var o = f.querySelector('.os-progreso');
+      if (o) o.textContent = h + ' de ' + t;
+    });
+  }
+  contarFases();
+
+  /* — Avance de "Analizar todos" (Sitios): [data-analisis-red] —
+     El análisis corre en el servidor, en segundo plano. Aquí solo se
+     pregunta cada 4 s cómo va y, al terminar, se recarga para que cada
+     tarjeta traiga su índice nuevo. */
+  var ar = document.querySelector('[data-analisis-red]');
+  if (ar && window.fetch) {
+    var tic = setInterval(function () {
+      fetch('/api/os.php?action=red_estado', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          var e = j && j.estado;
+          if (!e || e.fin) { clearInterval(tic); location.reload(); return; }
+          var h = ar.querySelector('[data-ar-hechos]');
+          var a = ar.querySelector('[data-ar-actual]');
+          var b = ar.querySelector('[data-ar-barra]');
+          if (h) h.textContent = e.hechos;
+          if (a) a.textContent = e.actual || '';
+          if (b && e.total) b.style.width = Math.round(e.hechos / e.total * 100) + '%';
+        })
+        .catch(function () {});
+    }, 4000);
+  }
+})();
+</script>
+
+<div class="asis asis--arriba" id="asis">
+  <button type="button" class="asis-boton" id="asis-boton" aria-expanded="false" aria-controls="asis-caja" title="Pregúntale al robot" hidden>
+        <span class="asis-nombre">Pregúntale</span>
+  </button>
+  <section class="asis-caja" id="asis-caja" hidden aria-label="Asistente de Kaiva">
+    <div class="asis-charla" id="asis-charla" aria-live="polite">
+      <p class="asis-msj asis-msj--el">¡Hola! Soy el robot de Kaiva 👋 Pregúntame cómo va el estudio. Escribe «ayuda» para ver qué sé.</p>
+    </div>
+    <div class="asis-chips" id="asis-chips"></div>
+    <button type="button" class="asis-telefono" id="asis-telefono">📱 Usarlo en el teléfono</button>
+    <form class="asis-form" id="asis-form">
+      <input type="text" id="asis-texto" maxlength="300" autocomplete="off" placeholder="¿Cómo vamos?" aria-label="Pregunta">
+      <button type="submit">Enviar</button>
+    </form>
+  </section>
+</div>
+<script>
+(function () {
+  var caja = document.getElementById('asis-caja');
+  var boton = document.getElementById('asis-boton');
+  var charla = document.getElementById('asis-charla');
+  var chips = document.getElementById('asis-chips');
+  var form = document.getElementById('asis-form');
+  var campo = document.getElementById('asis-texto');
+  if (!caja) return;
+
+  /* La sesión del panel vence tras 24 min sin actividad aunque la página siga abierta: se avisa en vez de fallar callado. */
+  var VENCIDA = 'Tu sesión del panel venció. Recarga la página (F5) y vuelve a entrar.';
+  function leerRespuesta (r) {
+    if (r.status === 401) { var e = new Error('vencida'); e.vencida = true; throw e; }
+    return r.json();
+  }
+  var robot = function (estado, segundos) { if (window.kvRobot) window.kvRobot.estado(estado, segundos); };
+  /* El robot de la cabecera de Inicio también abre el chat; mientras está
+     abierto, escucha (ondas moradas) y el saludo dice «Te escucho…». */
+  var arriba = Array.prototype.slice.call(document.querySelectorAll('[data-asis-abrir]'));
+  var saludo = document.querySelector('[data-saludo-txt]');
+  var saludoAntes = saludo ? saludo.textContent : '';
+  function abrir (si) {
+    caja.hidden = !si;
+    boton.setAttribute('aria-expanded', si ? 'true' : 'false');
+    arriba.forEach(function (b) { b.setAttribute('aria-expanded', si ? 'true' : 'false'); b.classList.toggle('escucha', si); });
+    if (saludo) saludo.textContent = si ? 'Te escucho…' : saludoAntes;
+    if (si) { campo.focus(); robot('feliz', 1.6); }
+  }
+  campo.addEventListener('input', function () { robot(campo.value ? 'escuchando' : 'neutral'); });
+  boton.addEventListener('click', function () { abrir(caja.hidden); });
+  arriba.forEach(function (b) { b.addEventListener('click', function () { abrir(caja.hidden); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !caja.hidden) abrir(false); });
+
+  function mensaje (texto, quien) {
+    var p = document.createElement('p');
+    p.className = 'asis-msj asis-msj--' + quien;
+    p.textContent = texto;
+    charla.appendChild(p);
+    charla.scrollTop = charla.scrollHeight;
+    return p;
+  }
+
+  function sugerir (lista) {
+    chips.textContent = '';
+    (lista || []).forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = s;
+      b.addEventListener('click', function () { preguntar(s); });
+      chips.appendChild(b);
+    });
+  }
+
+  function preguntar (texto) {
+    texto = (texto || '').trim();
+    if (!texto) return;
+    mensaje(texto, 'yo');
+    var espera = mensaje('…', 'el');
+    robot('pensando');
+    fetch('/api/asistente.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ texto: texto }) })
+      .then(leerRespuesta)
+      .then(function (d) {
+        espera.textContent = d.texto || 'No te entendí.';
+        robot('hablando', Math.min(4, 1 + (d.texto || '').length / 60));
+        sugerir(d.sugerencias);
+        if (d.ir) setTimeout(function () { location.href = '?tab=' + encodeURIComponent(d.ir); }, 500);
+      })
+      .catch(function (e) { espera.textContent = e && e.vencida ? VENCIDA : 'No pude conectarme. Intenta de nuevo.'; robot('sorprendido', 1.5); });
+  }
+
+  form.addEventListener('submit', function (e) { e.preventDefault(); preguntar(campo.value); campo.value = ''; });
+
+  /* — En vivo con el teléfono (voz/sala.py): le manda el mouse y obedece lo que le piden por voz — */
+  var canal = { ws: null, espera: 1000, ultimo: 0, telefono: 0 };
+  function llaveCanal () {
+    try {
+      var g = JSON.parse(localStorage.getItem('kaiva-canal') || 'null');
+      if (g && g.vence > Date.now() + 86400000) return Promise.resolve(g.llave);
+    } catch (e) {}
+    return fetch('/api/robot-llave.php', { method: 'POST', credentials: 'same-origin' }).then(leerRespuesta).then(function (d) {
+      var llave = d.url.split('#k=')[1];
+      try { localStorage.setItem('kaiva-canal', JSON.stringify({ llave: llave, vence: Date.parse(d.vence) })); } catch (e) {}
+      return llave;
+    });
+  }
+  function conectar () {
+    llaveCanal().then(function (llave) {
+      var host = location.hostname === 'localhost' ? 'localhost:8090' : location.host + '/ws';
+      var ws = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + host + '/?rol=panel&k=' + encodeURIComponent(llave));
+      canal.ws = ws;
+      ws.onopen = function () { canal.espera = 1000; };
+      ws.onmessage = function (e) {
+        var m;
+        try { m = JSON.parse(e.data); } catch (x) { return; }
+        if (m.t === 'presencia') {
+          canal.telefono = m.telefono || 0;
+          boton.title = canal.telefono ? 'Pregúntale al robot · el teléfono está conectado' : 'Pregúntale al robot';
+        }
+        if (m.t === 'charla' && m.texto) {   // lo que le dijeron al teléfono también queda en el chat
+          if (m.oido) mensaje(m.oido, 'yo');
+          mensaje('📱 ' + m.texto, 'el');
+          robot('hablando', Math.min(4, 1 + m.texto.length / 60));
+        }
+        if (m.t === 'ir' && /^[a-z]+$/.test(m.tab || '')) {
+          robot('feliz', 1.2);
+          var u = new URL(location.href);
+          u.searchParams.set('tab', m.tab);
+          setTimeout(function () { location.href = u.toString(); }, 600);
+        }
+      };
+      ws.onclose = function (e) {
+        canal.ws = null;
+        if (e.code === 4401) { try { localStorage.removeItem('kaiva-canal'); } catch (x) {} }
+        setTimeout(conectar, canal.espera);
+        canal.espera = Math.min(30000, canal.espera * 2);
+      };
+    }).catch(function () { setTimeout(conectar, 30000); });
+  }
+  document.addEventListener('mousemove', function (e) {
+    var ahora = Date.now();
+    if (!canal.ws || canal.ws.readyState !== 1 || !canal.telefono || ahora - canal.ultimo < 60) return;
+    canal.ultimo = ahora;
+    canal.ws.send(JSON.stringify({ t: 'cursor', x: +(e.clientX / innerWidth).toFixed(3), y: +(e.clientY / innerHeight).toFixed(3) }));
+  });
+  conectar();
+
+  /* — El robot en el teléfono: un QR con una llave que sólo sirve para preguntarle (src/robot-llave.php) — */
+  document.getElementById('asis-telefono').addEventListener('click', function () {
+    var aviso = mensaje('Preparando el código…', 'el');
+    var cargarQR = window.qrcode ? Promise.resolve() : new Promise(function (ok, mal) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+      s.onload = ok; s.onerror = mal;
+      document.head.appendChild(s);
+    });
+    Promise.all([cargarQR, fetch('/api/robot-llave.php', { method: 'POST', credentials: 'same-origin' }).then(leerRespuesta)])
+      .then(function (res) {
+        var d = res[1];
+        var qr = window.qrcode(0, 'M');
+        qr.addData(d.url);
+        qr.make();
+        aviso.textContent = 'Escanéalo con la cámara del teléfono y ponlo acostado debajo del monitor. Ahí puedes hablarle o escribirle. El enlace vale hasta el ' + d.vence + '.';
+        var cuadro = document.createElement('div');
+        cuadro.className = 'asis-qr';
+        cuadro.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2, scalable: true });
+        charla.appendChild(cuadro);
+        charla.scrollTop = charla.scrollHeight;
+        robot('entusiasmado', 2);
+      })
+      .catch(function (e) { aviso.textContent = e && e.vencida ? VENCIDA : 'No pude crear el código. Intenta de nuevo.'; robot('sorprendido', 1.5); });
+  });
+  sugerir(['¿Cómo vamos?', '¿Qué hay para hoy?', '¿Qué falta por cobrar?', '¿Cómo van los proyectos?']);
+})();
+</script>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  } }
+</script>
+<script type="module" src="robot/asistente.js"></script>
+            
+                  </main>
+    </div>
+  </div>
+  <script>
+    /* El dominio de este panel. Había tres llamadas a ejecutarAnalisis(): dos
+       pasándole el dominio y una sin ningún argumento, que mandaba
+       `url: undefined` al backend y volvía con un error de validación dentro
+       de un alert(). Ahora el dominio lo sabe el guion. */
+    var KV_DOMINIO = "kaivastudio.com";
+  </script>
+  <script src="assets/panel.js"></script>
+  <script src="assets/k-vida.js" defer></script>
+<script>
+/* Vista previa: aquí nada se guarda. */
+document.addEventListener('submit', function (e) { e.preventDefault(); e.stopImmediatePropagation(); }, true);
+</script>
+</body>
+
+</html>

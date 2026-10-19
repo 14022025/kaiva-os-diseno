@@ -1,0 +1,493 @@
+/* ============================================================================
+   TOKENS — la única fuente del sistema visual de Kaiva
+   ============================================================================
+
+   POR QUÉ EXISTE ESTE ARCHIVO
+   ---------------------------
+   Hasta hoy el bloque `:root` estaba escrito CINCO veces: portada.css,
+   pagina.css, monitor.css, legal.css y el <style> del Panel Pro. No era
+   desorden estético: las copias divergieron y produjeron tres fallos de render
+   en producción, los tres por el mismo mecanismo — una `var()` escrita mirando
+   otra hoja.
+
+     · `--violet-hover`  se usaba en portada.css y solo se declaraba en
+                         monitor.css. El botón de enviar del chat de la FAQ
+                         DESAPARECÍA en hover: el fondo caía a transparent y
+                         quedaba un icono blanco sobre blanco.
+     · `--epilogue`      se invocaba diez veces en monitor.css y no existía en
+                         ninguna parte del repositorio. El <h1> de la primera
+                         pantalla de la aplicación salía en Inter, no en la
+                         fuente display.
+     · `--ease`          se invocaba en el Panel Pro, que no lo declara. Caía
+                         al `ease` del navegador sin que nadie lo notara.
+
+   Un token que falta no avisa: la propiedad se descarta y la página sigue
+   pintando. Por eso la regla que acompaña a este archivo importa tanto como
+   los valores que contiene.
+
+   LAS SEIS REGLAS
+   ---------------
+   1. Ninguna hoja declara tokens. Cualquier `--token:` fuera de este archivo
+      es un error de revisión. Las excepciones legítimas son las variables
+      LOCALES de un componente (`--tx`, `--s`, `--bezel`): viven en su propio
+      selector, no en `:root`, y no describen el sistema sino una geometría.
+   2. Ningún `var()` de color lleva valor de reserva. `var(--ink-faint,#94a3b8)`
+      convierte un token ausente en un gris que ya se rechazó por contraste, y
+      lo hace en silencio. Si el token falta, se quiere el fallo visible.
+   3. El token base de un color de estado NUNCA es color de letra. Para texto e
+      iconos va siempre la variante `-ink`. Ver "Estado" más abajo.
+   4. Las cuatro superficies importan este archivo. La del Panel Pro es una
+      copia servida desde su propio origen (ver "La copia del Panel Pro").
+   5. Los valores con una medición detrás llevan su número en el comentario.
+      Si alguien los cambia, que sepa qué está tirando a la basura.
+   6. Añadir un valor nuevo a una escala exige borrar otro o justificar por
+      escrito por qué la escala se queda corta.
+
+   LA COPIA DEL PANEL PRO
+   ----------------------
+   El landing vive en GitHub Pages (kaivastudio.com) y el Panel Pro en el VPS
+   (diagnostico.kaivastudio.com). Son orígenes distintos y despliegues
+   distintos. Enlazar este archivo desde el panel crearía una dependencia de
+   arranque entre dos servidores: si GitHub Pages tarda, el panel pinta sin
+   sistema. Por eso el panel sirve su PROPIA copia desde
+   `tool/public/assets/tokens.css`, byte a byte idéntica a esta.
+
+   `tool/src/verificar-tokens.php` compara las dos y falla si divergen. Se
+   corre antes de publicar. Es el mismo mecanismo de la regla 1, aplicado al
+   único caso donde una copia es inevitable.
+
+   CONTRASTES
+   ----------
+   Las razones anotadas son sobre blanco (#ffffff) salvo que se diga otra cosa,
+   calculadas con la fórmula de WCAG 2.1. AA pide 4,5:1 para texto normal,
+   3:1 para texto grande (≥24px, o ≥19px en negrita) y 3:1 para el borde de
+   cualquier control con el que se pueda interactuar (1.4.11).
+   ============================================================================ */
+
+:root {
+
+  /* --- SUPERFICIE ---------------------------------------------------------
+     Tres suelos, no cuatro. `--paper` era un tercer nombre para el mismo
+     blanco sin ningún criterio escrito que dijera cuándo usar uno u otro.
+
+     `--canvas` es el que faltaba y explica un problema real: en la aplicación
+     había tarjetas blancas sobre tarjetas blancas sobre blanco, separadas solo
+     por filetes del 5% de alfa. El suelo de aplicación es gris; encima de él
+     la tarjeta blanca se lee sola, sin necesidad de sombra ni de borde. */
+  --bg: #ffffff;                    /* fondo de página — marketing */
+  --canvas: #f8fafc;                /* suelo de aplicación — .panel, .app */
+  --surface: #ffffff;               /* tarjeta o panel elevado */
+
+  /* --- TINTA --------------------------------------------------------------
+     Ya calibrada y documentada. No se toca sin recalcular.
+     El gris #94a3b8 está PROHIBIDO: 2,56:1, y el nombre invitaba a usarlo para
+     adorno cuando en la práctica lo llevaba texto de verdad. */
+  --ink: #0f172a;                   /* 17,85:1 — títulos, cifras, texto fuerte */
+  --ink-soft: #475569;              /*  7,58:1 — cuerpo secundario */
+  --ink-faint: #64748b;             /*  4,76:1 — metadatos. El más claro que pasa AA */
+
+  /* --- FILETES Y BORDES ---------------------------------------------------
+     `--line` y `--line-strong` son separación visual: 1,11:1 y 2,32:1 son
+     correctos porque no son controles, son costuras.
+
+     `--line-control` es nuevo y NO es opcional: WCAG 1.4.11 pide 3:1 para el
+     borde de cualquier cosa con la que se pueda interactuar. Todos los campos
+     del producto estaban entre 1,23:1 y 1,34:1 — el borde existía para el que
+     ya sabía dónde estaba el campo. */
+  --line: rgba(15, 23, 42, 0.05);
+  --line-strong: rgba(15, 23, 42, 0.12);
+  --line-control: rgba(15, 23, 42, 0.32);   /* ≈ #adb1b7 ≈ 3,03:1 */
+
+  /* --- MARCA --------------------------------------------------------------
+     El violeta es acento, nunca fondo de sección ni botón principal: esa
+     disciplina es de las cosas que mejor funcionan del sistema actual y se
+     mantiene.
+
+     `--violet-2` es el único que NO puede llevar texto: 3,09:1 solo alcanza
+     para texto grande, y su sitio son los degradados.
+
+     UN SOLO NEGRO. `--dark-2` y `--dark` convivían como dos negros de marca
+     contra un comentario que decía justo lo contrario. `--dark-2` sobrevive
+     únicamente como superficie elevada dentro del pie oscuro, que es su uso
+     real, y por eso cambia de nombre. */
+  --violet: #8242f5;                /* 5,19:1 — acento, estado activo, relleno */
+  --violet-ink: #6a2fe0;            /* 6,78:1 — violeta sobre blanco cuando es letra */
+  --violet-soft: rgba(130, 66, 245, 0.06);
+  --violet-2: #a679ff;              /* 3,09:1 — SOLO degradados. Nunca letra */
+  --dark: #0b0b0e;                  /* el negro de marca: CTA, pie */
+  --dark-raised: #141419;           /* superficie elevada DENTRO de lo oscuro */
+  --dark-line: rgba(255, 255, 255, 0.09);
+
+  /* --- ESTADO -------------------------------------------------------------
+     Tres roles por color, no uno. Es la regla 3 y resuelve de un golpe el
+     problema de contraste más grave que tenía el producto: las etiquetas de
+     severidad estaban a 2,02:1 (ámbar sobre ámbar claro, a 11px y en negrita)
+     y los símbolos de las revisiones a 2,15:1.
+
+       base   → rellenos, barras, puntos, iconos grandes, bordes
+       -ink   → SIEMPRE que sea letra o icono pequeño
+       -soft  → fondos teñidos
+
+     Las razones de las variantes `-ink` están medidas sobre su propio fondo
+     `-soft`, que es donde se usan de verdad, y también sobre blanco, que es
+     donde se usan cuando el estado va suelto en una fila o en una cifra.
+     Las cinco están medidas EN EL NAVEGADOR sobre la etiqueta ya pintada, no
+     calculadas a mano: la primera versión de este archivo traía tres cifras
+     heredadas de la auditoría y dos estaban mal (el ámbar decía 5,02 y da
+     4,73; el rojo decía 7,10 y da 5,83). Las tres pasan AA igual, pero un
+     número escrito al lado de un color es una promesa. */
+  --ok: #10b981;
+  --ok-ink: #047857;                /* 5,09:1 sobre --ok-soft · 5,48:1 sobre blanco */
+  --ok-soft: rgba(16, 185, 129, 0.08);
+
+  --warn: #f59e0b;
+  --warn-ink: #b45309;              /* 4,73:1 sobre --warn-soft · 5,02:1 sobre blanco */
+  --warn-soft: rgba(245, 158, 11, 0.08);
+
+  --bad: #ef4444;
+  --bad-ink: #b91c1c;               /* 5,83:1 sobre --bad-soft · 6,29:1 sobre blanco */
+  --bad-soft: rgba(239, 68, 68, 0.08);
+
+  /* --- SERIES DE DATOS ----------------------------------------------------
+     Una gráfica con dos series necesita dos colores, y eso no es lo mismo que
+     un color de estado: aquí el color no dice "bien" ni "mal", dice "esta
+     línea es Clics y esta otra es Apariciones". Sin este papel declarado, el
+     cian del panel parecía un color suelto sin función y estuvo a punto de
+     borrarse; sí la tiene, y está documentada donde se usa.
+
+     La corrección: el cian base es #0ea5e9 y como LETRA daba 4,10:1, por
+     debajo del 4,5:1 de AA — y se usaba justo así, en la cifra de cada barra
+     de Apariciones. La variante `-ink` es la que lleva el número. Es la
+     regla 3 otra vez: el token base nunca es color de letra. */
+  --serie-1: var(--violet);         /* Clics */
+  --serie-1-ink: var(--violet-ink);
+  --serie-2: #0ea5e9;               /* Apariciones en Google */
+  --serie-2-ink: #0369a1;           /* 5,93:1 — era #0284c7, que daba 4,10:1 */
+
+  /* --- TIPOGRAFÍA ---------------------------------------------------------
+     Dos familias. `--epilogue` nunca existió: era una fuente de un rediseño
+     anterior que se quedó invocada en diez sitios.
+
+     La escala tiene SIETE pasos y sustituye a los 44 tamaños que había en la
+     aplicación gratis y los 22 del panel, muchos separados por medio píxel.
+     Va en rem y no en px para que respete el tamaño de letra que la persona
+     haya configurado en su navegador; los px del comentario son el valor
+     resultante con la raíz por defecto de 16px.
+
+     Fuera de la escala, a propósito y con su comentario en el sitio donde se
+     usen: la micro-tipografía de las maquetas en miniatura (5–10,5px), que se
+     lee como dibujo y no como texto, y el mínimo de 16px en campos de
+     formulario bajo `(pointer: coarse)`, que no es estético — por debajo de
+     16px Safari en iPhone hace zoom al enfocar y descoloca la página. */
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --display: 'Inter Tight', 'Inter', system-ui, sans-serif;
+
+  --t-2xs: 0.6875rem;               /* 11px — micro-etiqueta en mayúscula, severidades */
+  --t-xs: 0.75rem;                  /* 12px — metadatos, ejes, pies de gráfica */
+  --t-sm: 0.8125rem;                /* 13px — texto de apoyo, filas de tabla, menú */
+  --t-base: 0.9375rem;              /* 15px — cuerpo por defecto */
+  --t-md: 1rem;                     /* 16px — prosa larga */
+  --t-lg: 1.25rem;                  /* 20px — título de pantalla */
+  --t-xl: 1.5rem;                   /* 24px — cifra secundaria */
+  --t-score: clamp(2.6rem, 6vw, 3.5rem);   /* la cifra protagonista, en --display */
+
+  /* Cuatro pesos. El 550 y el 650 tenían una y dos apariciones: una fuente
+     variable permite cualquier número, y eso es justo lo que hay que evitar. */
+  --w-medio: 500;
+  --w-semi: 600;
+  --w-fuerte: 700;
+  --w-negro: 800;
+
+  /* --- ESPACIO ------------------------------------------------------------
+     Base de 4px, ocho pasos, ninguno más. Sustituyen a los 25 valores de gap
+     y los 30 de padding que había repartidos por las hojas. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* Contenedores y ritmo. `--panel-pad` y `--card-pad` eran fijos y en un
+     teléfono de 360px el relleno se comía casi un tercio del ancho. */
+  --maxw: 1380px;
+  --pad: clamp(1.25rem, 4vw, 3.75rem);      /* margen lateral de marketing */
+  --panel-pad: clamp(1rem, 4vw, 1.8rem);
+  --card-pad: clamp(1rem, 3.5vw, 1.4rem);
+  --sidebar: 240px;                          /* unificado: era 220 en el monitor, 240 en el Pro */
+
+  /* --- RADIOS -------------------------------------------------------------
+     Seis, cada uno con un papel que se puede decir en una frase. Había doce
+     vivos en el monitor, trece en el Pro y veinte en el landing.
+
+     Los tres del medio (`--r-ui`, `--r-ui-lg`) NO se redondean a una escala
+     bonita: están medidos contra attio.com el 2026-08-05 y anotados como
+     medidos. Cambiarlos por 8/16 porque "queda más limpio" es tirar la única
+     medición que hay.
+
+     Migración de los valores sueltos:
+       2, 3, 4, 5      → --r-sm
+       7, 8, 9         → --r-sm o --r-ui según el tamaño del elemento
+       11, 12, 13      → --r-ui-lg
+       14, 18, 20, 22  → --r-ui-lg (aplicación) o --r-md (marketing)
+       99, 100, 999    → --r-pill
+     Quedan fuera, con su comentario en el sitio, los radios de 2–9px de las
+     maquetas en miniatura. */
+  --r-sm: 6px;                      /* chips, badges, severidades, <code> */
+  --r-ui: 10px;                     /* controles: botones, campos, filas de menú */
+  --r-ui-lg: 12px;                  /* superficies de aplicación: tarjetas, modales */
+  --r-md: 16px;                     /* tarjeta mediana de marketing */
+  --r-lg: 24px;                     /* bloque grande de marketing */
+  --r-pill: 999px;                  /* píldoras de verdad. Unifica 99 / 100 / 999 */
+
+  /* --- SOMBRAS ------------------------------------------------------------
+     Dos familias con fronteras claras, contra las 22 sombras escritas a mano
+     que había.
+
+     Las de aplicación llevan la tinta azulada (0,22,62) medida contra Attio:
+     una sombra gris neutra sobre un suelo azulado se ve sucia. Las de
+     marketing son las de siempre.
+
+     Desaparecen sin sustituto las sombras teñidas de violeta y los
+     `drop-shadow()` de los robots: una sombra del color de la marca es adorno,
+     no profundidad. */
+  --shadow-ui:
+    0 0 0 1px rgba(0, 22, 62, 0.04),
+    0 4px 12px -1px rgba(0, 22, 62, 0.05),
+    0 1px 3px -1px rgba(0, 22, 62, 0.09);
+  --shadow-ui-hover:
+    0 0 0 1px rgba(0, 22, 62, 0.05),
+    0 8px 20px -2px rgba(0, 22, 62, 0.08),
+    0 2px 5px -1px rgba(0, 22, 62, 0.10);
+  --shadow-pop:                     /* menús, modales, globos de ayuda */
+    0 0 0 1px rgba(0, 22, 62, 0.05),
+    0 18px 40px -18px rgba(15, 23, 42, 0.30);
+
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 12px 36px rgba(15, 23, 42, 0.05), 0 2px 8px rgba(15, 23, 42, 0.02);
+  --shadow-lg: 0 28px 64px rgba(15, 23, 42, 0.08), 0 8px 24px rgba(15, 23, 42, 0.03);
+
+  /* --- MOVIMIENTO ---------------------------------------------------------
+     Cuatro curvas con un papel cada una y tres duraciones, contra las quince
+     duraciones del monitor y las diez del Pro.
+
+     `--d-slow` es el tope. Las narraciones de dato que tardaban 1,5s no eran
+     elegancia: eran un segundo y medio de espera antes de poder leer el número
+     más importante de la pantalla. */
+  --ease-ui: cubic-bezier(0.2, 0, 0, 1);           /* chrome de aplicación: respuesta seca */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);          /* marketing general */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);    /* apariciones al scroll, solo marketing */
+  --ease-press: cubic-bezier(0.4, 0, 0.2, 1);      /* feedback de :active */
+
+  --d-fast: 120ms;                  /* respuesta al puntero: hover, active */
+  --d-base: 200ms;                  /* cambio de estado, entrada de capas */
+  --d-slow: 400ms;                  /* narración de dato: barras, anillos, contadores */
+
+  /* Dos papeles que el sistema no tenía (MOTION.md, 2026-10-12). Regla 6:
+     no amplían una escala, cubren huecos que se estaban rellenando a mano.
+     · SALIR. Todo salía con la curva de entrar y en el mismo tiempo, así que
+       lo que se iba frenaba en la cara del usuario. Lo que sale acelera y se
+       va en ~70 % de lo que tardó en entrar (NN/g, Material 3).
+     · EL RESORTE. Un solo momento de deleite por flujo (el check, abrir la
+       Recap). Pico de 1,028: 2,8 % de rebote, el tope de Apple para algo que
+       no sea un juego. Sin linear() cae a --ease-reveal, sin rebote.
+       Solo para transform, nunca para color ni opacidad. */
+  --ease-sale: cubic-bezier(0.3, 0, 0.8, 0.15);    /* salidas: acelera y se va */
+  --ease-resorte: cubic-bezier(0.16, 1, 0.3, 1);   /* respaldo; el resorte real abajo */
+
+  /* --- FOCO ---------------------------------------------------------------
+     El foco visible existía en la mitad de los controles, superficie por
+     superficie, sin token y sin regla global. Ahora es una sola regla, más
+     abajo en este mismo archivo. */
+  --focus: 2px solid var(--violet);
+  --focus-offset: 2px;
+
+  /* --- COMPATIBILIDAD -----------------------------------------------------
+     TRANSITORIO. Estos alias existen para que ninguna hoja se rompa mientras
+     se migran sus usos, y para que el bug de `--violet-hover` quede tapado
+     desde el primer despliegue aunque quede alguna referencia sin cambiar.
+
+     Se borran cuando `grep` no encuentre ninguno en el repositorio. Mientras
+     existan, `--violet-hover` NO es un token nuevo: es el mismo
+     `--violet-ink` con el nombre viejo. */
+  --violet-hover: var(--violet-ink);
+  --paper: var(--surface);
+  --green: var(--ok);
+  --green-soft: var(--ok-soft);
+  --amber: var(--warn);
+  --ambar: var(--warn);
+  --ambar-soft: var(--warn-soft);
+  --red: var(--bad);
+  --red-soft: var(--bad-soft);
+  --rojo: var(--bad);
+  --rojo-soft: var(--bad-soft);
+  --dark-2: var(--dark-raised);
+  --r-btn: var(--r-pill);
+  --epilogue: var(--display);
+  --teal: var(--serie-2);
+  --teal-ink: var(--serie-2-ink);
+}
+
+
+/* ============================================================================
+   COMPONENTES COMPARTIDOS
+   ============================================================================
+   Lo que sigue no son tokens, son las tres piezas que TIENEN que ser idénticas
+   en las cuatro superficies. Viven aquí porque es el único archivo que las
+   cuatro cargan: el Panel Pro no puede importar monitor.css, y duplicar estas
+   reglas es exactamente cómo empezó el problema que este archivo resuelve.
+   ============================================================================ */
+
+/* --- FOCO VISIBLE ----------------------------------------------------------
+   Una sola regla sustituye a las tres sueltas del landing, las tres del
+   monitor y las siete del Panel Pro, y cubre de una vez los selectores que
+   estaban huérfanos: las filas del menú lateral, las cabeceras de hallazgo,
+   los botones de la tarjeta temporal, las equis de los modales.
+
+   `:focus-visible` y no `:focus`: el anillo aparece cuando se navega con
+   teclado y no cuando se hace clic, que es la razón por la que a los anillos
+   de foco se les quitaba el estilo en primer lugar. */
+:is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--focus);
+  outline-offset: var(--focus-offset);
+  border-radius: inherit;
+}
+
+/* Sobre fondo oscuro el violeta del foco se pierde. */
+:is(.dark-footer, .cierre, .kv-dark) :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline-color: #ffffff;
+}
+
+/* --- DESHABILITADO Y PRESIONADO --------------------------------------------
+   Tres botones del producto se deshabilitaban por JS y no tenían ni un estilo
+   que lo dijera: seguían levantándose en hover, invitando a un clic que no
+   hacía nada.
+
+   La segunda regla es la que hay que recordar: TODO hover se condiciona con
+   `:not(:disabled)`, o el deshabilitado vuelve a moverse. */
+button[disabled],
+.btn[disabled],
+button[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+button[disabled]:hover,
+.btn[disabled]:hover,
+button[aria-disabled='true']:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- SEVERIDAD -------------------------------------------------------------
+   Las CINCO severidades que el backend calcula, declaradas una vez y
+   consumidas por la aplicación gratis y por el panel.
+
+   Dos problemas resueltos a la vez:
+
+   1. Contraste. Estaban a 2,02:1 (alto), 3,39:1 (crítico) y 2,33:1 (ok). La
+      solución ya existía dos veces en el propio código, en `.kv-sev-medio` y
+      en `.score-badge.si`; solo no se había generalizado.
+
+   2. Priorización invisible. El backend distingue crítico, alto, medio, bajo y
+      ok, pero la interfaz pintaba `medio` y `bajo` con las mismas clases que
+      `alto`: cinco niveles entrando por tres colores. La persona no podía ver
+      el orden que el producto sí había calculado.
+
+   El nivel se distingue por RELLENO frente a CONTORNO, no solo por matiz: así
+   sobrevive al daltonismo y a la impresión en blanco y negro, que es donde
+   un sistema de solo-color falla. */
+.sev {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 3px var(--s-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font: var(--w-fuerte) var(--t-2xs) / 1.2 var(--sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sev--critico {
+  background: var(--bad-soft);
+  color: var(--bad-ink);
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.sev--alto {
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+  border-color: rgba(245, 158, 11, 0.18);
+}
+
+/* Medio y bajo van en contorno: el peso visual baja sin que el texto pierda
+   contraste, que es lo que pasaba al aclarar el color de la letra. */
+.sev--medio {
+  background: transparent;
+  color: var(--warn-ink);
+  border-color: rgba(245, 158, 11, 0.38);
+}
+
+.sev--bajo {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: var(--line-strong);
+}
+
+.sev--ok {
+  background: var(--ok-soft);
+  color: var(--ok-ink);
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+/* --- MICRO-ETIQUETA --------------------------------------------------------
+   Había doce recetas de esto en el monitor y nueve en el Pro: la misma
+   etiqueta en mayúscula, escrita veintiuna veces con veintiún juegos de
+   valores ligeramente distintos. */
+.lbl {
+  font: var(--w-fuerte) var(--t-2xs) / 1.2 var(--sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.lbl--acento {
+  color: var(--violet);
+}
+
+/* El resorte de verdad, para los navegadores con linear() (Baseline desde
+   diciembre de 2023). 560 ms; generado con la fórmula del oscilador amortiguado
+   con rebote 0,25 (el mismo modelo de Apple, WWDC23). */
+@supports (animation-timing-function: linear(0, 1)) {
+  :root {
+    --ease-resorte: linear(0, 0.044, 0.149, 0.283, 0.424, 0.558, 0.677, 0.776, 0.856,
+      0.917, 0.961, 0.992, 1.011, 1.022, 1.027, 1.028, 1.027, 1.023, 1.019,
+      1.015, 1.012, 1.008, 1.006, 1.004, 1);
+  }
+}
+
+/* --- MOVIMIENTO REDUCIDO ---------------------------------------------------
+   Obligatorio en las cuatro superficies. El Panel Pro no tenía ni un bloque, y
+   sí una animación infinita en la única pantalla donde la persona no puede
+   hacer nada más que mirarla.
+
+   `animation-iteration-count: 1` es la línea que casi nadie escribe y sin la
+   cual esto empeora las cosas: acortar la duración de una animación infinita
+   no la apaga, la ACELERA. */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001s !important;
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

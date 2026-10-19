@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ventas · Kaiva OS</title>
+  <link rel="icon" href="assets/kaiva-k.png" type="image/png" sizes="192x192">
+  <!-- LA LETRA DEL SITIO NUEVO: GEIST.
+       Esto servía Inter e Inter Tight desde kaivastudio.com/assets/fonts para
+       no pedirle nada a Google detrás de un login. El sitio cambió de piel en
+       octubre de 2026 y ahora carga Geist y Geist Mono desde Google Fonts en
+       todas sus páginas; el panel hace lo mismo para que la letra sea la
+       misma. Es un panel interno del equipo: el argumento del consentimiento
+       (no conectar a terceros sin permiso del visitante) aquí no aplica.
+       Si algún día se quiere cero terceros, el cambio es copiar los dos
+       woff2 a public/assets/fonts y cambiar estas tres líneas. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+  <!-- El sistema visual. Se sirve desde NUESTRO origen, no desde el landing:
+       las fuentes de arriba sí pueden venir de kaivastudio.com porque una
+       fuente que tarda solo retrasa el intercambio de tipografía, pero una
+       hoja de estilos bloquea el pintado. Enlazar la del landing metería
+       GitHub Pages en la ruta crítica de arranque del panel, y si tarda, el
+       panel pinta sin colores.
+
+       public/assets/tokens.css es una copia byte a byte de
+       assets/tokens.css del landing. `php src/verificar-tokens.php` compara
+       las dos y falla si divergen; se corre antes de publicar. -->
+  <link rel="stylesheet" href="assets/tokens.css">
+  <link rel="stylesheet" href="assets/os.css">
+  <!-- CAMBIAR DE PESTAÑA SIN ESPERAR.
+       Al dejar el puntero un instante sobre un enlace del panel (todos
+       empiezan por "?": ?tab=crm, ?tab=finanzas…), el navegador prepara esa
+       página por detrás; al hacer clic ya está hecha y aparece al momento.
+       Solo enlaces internos que leen: nada de /api/ ni formularios. Chrome y
+       Edge lo hacen; los demás navegadores lo ignoran y cargan como siempre.
+       Las pestañas del menú se descargan apenas carga la página (prefetch:
+       solo el HTML, sin ejecutar nada): el servidor está lejos (≈ 85 ms de
+       ida y vuelta) y así el clic no espera a la red. -->
+  <script type="speculationrules">
+  {"prefetch": [{"where": {"selector_matches": ".k-riel a[href^='?']"}, "eagerness": "immediate"}],
+   "prerender": [{"where": {"selector_matches": "a[href^='?']:not([data-vista])"}, "eagerness": "moderate"}]}
+  </script>
+  <link rel="stylesheet" href="assets/panel.css">
+    <link rel="stylesheet" href="assets/k-base.css">
+    <link rel="stylesheet" href="assets/k-ventas.css">
+    <link rel="stylesheet" href="assets/k-contacto.css">
+  </head>
+
+<body class="kv-os">
+  <!-- LA PANTALLA DE ESPERA. Ver la nota larga del CSS (.scanner-overlay).
+       Lo que hay que mirar aquí es el marcado que le faltaba: role="dialog" +
+       aria-modal + tabindex="-1" para poder llevarle el foco, el Cancelar
+       visible desde el primer segundo, y el bloque de fallo con role="alert"
+       que sustituye a los dos alert() del navegador.
+       El título dice "Analizando", no "Ejecutando Auditoría Pro": el
+       vocabulario del producto tiene un verbo para esto y no es auditar. -->
+  <div class="scanner-overlay" id="scannerOverlay" role="dialog" aria-modal="true"
+       aria-labelledby="scanTitle" tabindex="-1" hidden>
+    <div class="scan-caja">
+      <img src="assets/kaiva-k.png" alt="" class="scan-robot float-robot">
+      <h2 class="scan-title" id="scanTitle">Analizando tu sitio</h2>
+
+      <div class="scan-progress-box" id="scanBarra">
+        <div class="scan-progress-bar"></div>
+      </div>
+
+      <p class="scan-status" id="scanStatus"></p>
+
+      <button type="button" class="scan-btn-sec" id="scanCancelar">Cancelar</button>
+
+      <div class="scan-fallo" id="scanFallo" role="alert" hidden>
+        <p class="scan-fallo-txt" id="scanFalloTxt"></p>
+        <div class="scan-fallo-acciones">
+          <button type="button" class="btn-chico" id="scanReintentar">Reintentar</button>
+          <button type="button" class="scan-btn-sec" id="scanCerrar">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <p id="kvAnuncio" class="kv-anuncio" role="status" aria-live="polite"></p>
+
+  <div class="tool-shell k-raiz">
+    <div class="k-marco">
+
+                <nav class="k-riel" aria-label="Secciones de Kaiva OS">
+          <a class="k-logo" href="inicio.html" aria-label="Kaiva OS, ir a Inicio">K<span class="k-tip">Kaiva OS</span></a>
+                      <a class="k-ico" href="inicio.html" aria-label="Inicio · 1 seguimiento para hoy o atrasado">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg>              <span class="k-badge k-badge-hoy" aria-hidden="true">1</span>              <span class="k-tip" aria-hidden="true">Inicio · 1 seguimiento para hoy o atrasado</span>
+            </a>
+                      <a class="k-ico on" href="ventas.html" aria-current="page" aria-label="Ventas · tablero, contactos y dinero">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>                            <span class="k-tip" aria-hidden="true">Ventas · tablero, contactos y dinero</span>
+            </a>
+                      <a class="k-ico" href="proyectos.html" aria-label="Proyectos · 1 entrega con la fecha pasada">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>              <span class="k-badge" aria-hidden="true">1</span>              <span class="k-tip" aria-hidden="true">Proyectos · 1 entrega con la fecha pasada</span>
+            </a>
+                      <a class="k-ico" href="redes.html" aria-label="Redes">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><path d="M17 7h.01"/></svg>                            <span class="k-tip" aria-hidden="true">Redes</span>
+            </a>
+                      <a class="k-ico" href="visibilidad.html" aria-label="Visibilidad · se cayó el permiso de Google">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>              <span class="k-badge" aria-hidden="true">!</span>              <span class="k-tip" aria-hidden="true">Visibilidad · se cayó el permiso de Google</span>
+            </a>
+                    <span class="k-sep" aria-hidden="true"></span>
+          <span class="k-empuja" aria-hidden="true"></span>
+          <a class="k-ico k-extra" href="https://kaivastudio.com/" target="_blank" rel="noopener" aria-label="Abrir kaivastudio.com">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c-3 3-3 14 0 17M12 3.5c3 3 3 14 0 17"/></svg>            <span class="k-tip" aria-hidden="true">kaivastudio.com ↗</span>
+          </a>
+
+                    <div class="k-cuenta" id="cuenta">
+            <button type="button" class="k-ico k-cuenta-btn" id="cuentaBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Tu cuenta">
+                            <span class="k-ini">K</span>
+              <span class="k-tip" aria-hidden="true">Tu cuenta</span>
+            </button>
+            <div class="k-cuenta-menu" id="cuentaMenu" role="menu" hidden>
+              <div class="k-cuenta-cab">
+                <b>Kaiva Studio</b>
+                <small>Google: hola@kaivastudio.com</small>
+              </div>
+                              <div class="k-cuenta-nota rota"><i></i>Se cayó el permiso de Google</div>
+                <a class="k-cuenta-item" role="menuitem" href="#">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v5h-5"/></svg>
+                  Volver a conectar                </a>
+                            <form method="post" action="#">
+                <button type="submit" class="k-cuenta-item" role="menuitem">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                  Cerrar sesión
+                </button>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Área de Contenido Principal -->
+        <main class="k-contenido">
+
+        
+                    
+                      <!-- Estás mirando un sitio que no es el tuyo.
+                 El aviso aparece por lo que ESTE informe es, no por cómo se
+                 llama el dominio: ver $esComparacion arriba. Y solo tiene
+                 sentido si hay a dónde volver, así que la salida se pinta
+                 únicamente cuando la persona tiene un sitio propio. -->
+            
+            
+                        
+            <!-- PESTAÑA: RESUMEN -->
+                                                        
+<div class="k-v k-v-contacto">
+  <section class="k-banda" aria-label="Contacto">
+    <div class="k-ficha-cab">
+      <a class="k-volver" href="contactos.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Contactos</a>
+      <h1 class="k-h1">Laura Martínez <span class="gris">Clínica Dental Sonríe</span></h1>
+      <div class="k-chips">
+        <span class="k-chip">Lead</span>
+        <span class="k-chip">Llegó por Google</span>                  <span class="k-chip negro">Le respondimos en 1 min</span>
+              </div>
+    </div>
+    <div class="k-acc">
+      <a class="k-pblanca" href="https://wa.me/573001112233?text=Hola%20Laura%20Mart%C3%ADnez%2C%20te%20escribo%20de%20Kaiva%20Studio." target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg>WhatsApp</a>      <a class="k-pblanca" href="mailto:laura@sonriedental.co"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m4.5 7 7.5 6 7.5-6"/></svg>Correo</a>      <button type="button" class="k-negra" data-abre="dlg-tarea" data-pre-cuenta_id="1">Seguimiento <span class="k-flecha"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></button>
+    </div>
+  </section>
+
+  <div class="k-rejilla">
+    <section class="k-t s7" aria-labelledby="t-linea">
+      <div class="k-cab"><h2 class="k-tit" id="t-linea">Su historia <span class="k-n">6</span></h2></div>
+      <ol class="k-linea">
+                  <li class="k-ev k-ev--hecho">
+            <span class="k-ev-ic negro"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+            <div>
+              <b>Hecho: Responder a Laura Martínez</b>
+                          </div>
+            <time datetime="2026-10-19 02:00:55">19 oct, 2:00 am</time>
+          </li>
+                  <li class="k-ev k-ev--trato">
+            <span class="k-ev-ic morado"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7"/></svg></span>
+            <div>
+              <b>Trato: Web corporativa</b>
+              <small>Nuevo Lead · 6.800.000 COP</small>            </div>
+            <time datetime="2026-10-19 01:42:51">19 oct, 1:42 am</time>
+          </li>
+                  <li class="k-ev k-ev--tarea">
+            <span class="k-ev-ic "><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+            <div>
+              <b>Responder a Laura Martínez</b>
+                          </div>
+            <time datetime="2026-10-18 01:42:51">18 oct, 1:42 am</time>
+          </li>
+                  <li class="k-ev k-ev--llego">
+            <span class="k-ev-ic morado"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+            <div>
+              <b>Llegó por Google</b>
+              <small>Llegó por el diagnóstico gratis.</small>            </div>
+            <time datetime="2026-10-17 01:42:51">17 oct, 1:42 am</time>
+          </li>
+                  <li class="k-ev k-ev--tarea">
+            <span class="k-ev-ic "><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+            <div>
+              <b>Primer contacto por el formulario</b>
+              <small>Quiere cambiar la web antes de diciembre.</small>            </div>
+            <time datetime="2026-10-17 01:42:51">17 oct, 1:42 am</time>
+          </li>
+                  <li class="k-ev k-ev--hecho">
+            <span class="k-ev-ic negro"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+            <div>
+              <b>Hecho: Primer contacto por el formulario</b>
+                          </div>
+            <time datetime="2026-10-17 01:42:51">17 oct, 1:42 am</time>
+          </li>
+              </ol>
+    </section>
+
+    <div class="k-pila s5">
+      <section class="k-t" aria-labelledby="t-datos">
+        <div class="k-cab"><h2 class="k-tit" id="t-datos">Datos</h2></div>
+                  <div class="k-dato"><span class="k-et">Correo</span><a class="k-val" href="mailto:laura@sonriedental.co">laura@sonriedental.co</a></div>
+                          <div class="k-dato"><span class="k-et">Teléfono</span><span class="k-val">+57 300 111 2233</span></div>
+                          <div class="k-dato"><span class="k-et">Sitio</span>
+            <span class="k-val">
+              <a class="k-sitio" href="https://sonriedental.co/" target="_blank" rel="noopener">sonriedental.co <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+              <span class="k-gris"> · sin analizar</span>              · <a class="k-subrayado" href="inicio.html">diagnóstico</a>
+            </span>
+          </div>
+                        <div class="k-dato"><span class="k-et">Desde</span><span class="k-val">el 17 oct, 1:42 am</span></div>
+      </section>
+
+      <section class="k-t" aria-labelledby="t-prox">
+        <div class="k-cab"><h2 class="k-tit" id="t-prox">Próximo paso</h2></div>
+                  <p class="k-vacio">Nada pendiente con Laura Martínez.</p>
+              </section>
+
+      <section class="k-t" aria-labelledby="t-tratos">
+        <div class="k-cab">
+          <h2 class="k-tit" id="t-tratos">Tratos <span class="k-n">1</span></h2>
+          <b class="k-tratos-total">$6,8 M</b>        </div>
+                  <div class="k-lista">
+                          <div class="k-fila">
+                <div class="txt">
+                  <b>Web corporativa</b>
+                  <small>Nuevo Lead · $6,8 M</small>
+                </div>
+              </div>
+                      </div>
+              </section>
+
+          </div>
+  </div>
+</div>
+
+  <dialog id="dlg-tarea" class="k-dlg" aria-labelledby="dlg-tarea-t">
+    <header class="k-dlg-cab"><div><h2 id="dlg-tarea-t">Nuevo seguimiento</h2><p>Una llamada, un mensaje o algo que no se puede olvidar.</p></div><button type="button" class="k-cerrar" data-cierra aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>    <form method="POST">
+      <input type="hidden" name="crm_nueva_actividad" value="1">
+      <input type="hidden" name="origen_tab" value="crm">
+              <div class="k-campos">
+          <label class="k-campo todo"><span class="k-et">Qué hay que hacer</span>
+            <input type="text" name="titulo" required class="k-in" placeholder="Enviar la propuesta en PDF">
+          </label>
+          <label class="k-campo todo"><span class="k-et">Con quién</span>
+            <select name="cuenta_id" required class="k-in"><option value="4">Camila Rojas — Marea Digital</option><option value="9">Valentina Ríos — Café Origen</option><option value="10">Tomás Herrera — Herrera &amp; Asociados</option><option value="11">Luisa Fernanda Mora — Mora Arquitectura</option><option value="12">Santiago Vélez — Vélez Motos</option><option value="13">Paula Andrade</option><option value="1">Laura Martínez — Clínica Dental Sonríe</option><option value="2">Andrés Ruiz — Ruiz Abogados</option><option value="3">Ricardo Gómez — ALBA</option><option value="5">Diana Ospina — Ruta Viajes Group</option><option value="6">Juliana Cárdenas</option><option value="7">Mauricio Pérez — Transportes del Norte</option><option value="8">Sara Villa — Editorial Brisa</option></select>
+          </label>
+          <fieldset class="k-campo todo"><legend class="k-et">Cómo</legend>
+            <div class="k-opciones"><label class="k-op"><input type="radio" name="tipo" value="whatsapp"><span>WhatsApp</span></label><label class="k-op"><input type="radio" name="tipo" value="llamada"><span>Llamada</span></label><label class="k-op"><input type="radio" name="tipo" value="reunion"><span>Reunión</span></label><label class="k-op"><input type="radio" name="tipo" value="email"><span>Correo</span></label><label class="k-op"><input type="radio" name="tipo" value="tarea" checked><span>Tarea</span></label><label class="k-op"><input type="radio" name="tipo" value="nota"><span>Nota</span></label></div>          </fieldset>
+          <fieldset class="k-campo"><legend class="k-et">Prioridad</legend>
+            <div class="k-opciones"><label class="k-op"><input type="radio" name="prioridad" value="normal" checked><span>Normal</span></label><label class="k-op"><input type="radio" name="prioridad" value="media"><span>Media</span></label><label class="k-op"><input type="radio" name="prioridad" value="alta"><span>Alta</span></label></div>          </fieldset>
+          <label class="k-campo"><span class="k-et">Para cuándo</span>
+            <input type="date" name="fecha_programada" value="2026-10-19" class="k-in">
+          </label>
+          <label class="k-campo todo"><span class="k-et">Notas <small>opcional</small></span>
+            <textarea name="descripcion" rows="3" class="k-in" placeholder="Lo que se habló, el presupuesto, lo que falta…"></textarea>
+          </label>
+        </div>
+        <div class="k-pie-dlg">
+          <button type="button" class="k-btn-sec" data-cierra>Cancelar</button>
+          <button type="submit" class="k-negra"><span>Guardar seguimiento</span><span class="k-flecha k-flecha--quieta"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></button>        </div>
+          </form>
+  </dialog>
+              
+            
+                                                    <script>
+(function () {
+  /* — Diálogos: [data-abre="id"] abre, [data-cierra] o clic fuera cierra — */
+  document.addEventListener('click', function (e) {
+    var abre = e.target.closest('[data-abre]');
+    if (abre) {
+      var d = document.getElementById(abre.getAttribute('data-abre'));
+      if (d && d.showModal) {
+        var padre = abre.closest('dialog');
+        if (padre && padre !== d) padre.close();
+        // Un botón puede preseleccionar valores del formulario: data-pre-campo="valor".
+        Array.prototype.forEach.call(abre.attributes, function (a) {
+          if (a.name.indexOf('data-pre-') === 0) {
+            var campo = a.name.slice(9);
+            // Un grupo de radios (las píldoras de las ventanas) se marca por su valor.
+            var radio = d.querySelector('input[type="radio"][name="' + campo + '"][value="' + a.value + '"]');
+            if (radio) { radio.checked = true; return; }
+            var c = d.querySelector('[name="' + campo + '"]');
+            if (c) c.value = a.value;
+          }
+        });
+        d.showModal();
+        var primero = d.querySelector('input:not([type=hidden]), select, textarea');
+        if (primero) primero.focus();
+      }
+      return;
+    }
+    if (e.target.closest('[data-cierra]') && !e.target.closest('[data-abre]')) {
+      var dlg = e.target.closest('dialog');
+      if (dlg) dlg.close();
+      return;
+    }
+    if (e.target.tagName === 'DIALOG' && e.target.open) {
+      var r = e.target.getBoundingClientRect();
+      var dentro = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!dentro) e.target.close();
+    }
+  });
+
+  /* — Analizar un dominio sin salir de la vista: [data-analizar="dominio"] —
+     Usa el mismo análisis (y la misma pantalla de espera) que el botón de
+     recargar de la barra; al terminar recarga y la fila ya trae su índice. */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-analizar]');
+    if (!b || typeof window.ejecutarAnalisis !== 'function') return;
+    window.ejecutarAnalisis(b.getAttribute('data-analizar'));
+  });
+
+  /* — Elegir un trato ganado rellena cliente y nombre del proyecto — */
+  document.addEventListener('change', function (e) {
+    var sel = e.target.closest('[data-rellena-proyecto]');
+    if (!sel) return;
+    var op = sel.options[sel.selectedIndex];
+    var f = sel.form;
+    if (op && op.dataset.cuenta) f.querySelector('[name="cuenta_id"]').value = op.dataset.cuenta;
+    var n = f.querySelector('[name="nombre"]');
+    if (op && op.dataset.nombre && !n.value) n.value = op.dataset.nombre;
+  });
+
+  /* — Un comprobante que pesa más de lo que PHP acepta (2 MB) se reduce en el
+       navegador antes de subirlo: las capturas del celular a veces pesan 3–4 MB
+       y no hace falta esa resolución para leer un comprobante. Los PDF no se
+       tocan. — */
+  document.addEventListener('change', function (e) {
+    var inp = e.target;
+    if (!inp.matches || !inp.matches('input[type="file"][name="comprobante"]')) return;
+    var f = inp.files && inp.files[0];
+    if (!f) return;
+    var autoenviar = inp.hasAttribute('data-autoenviar');
+    if (!/^image\//.test(f.type) || f.size <= 1800000) { if (autoenviar) inp.form.submit(); return; }
+    var img = new Image();
+    img.onload = function () {
+      var lado = 1800, k = Math.min(1, lado / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function (b) {
+        var dt = new DataTransfer();
+        dt.items.add(new File([b], f.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
+        inp.files = dt.files;
+        if (autoenviar) inp.form.submit();
+      }, 'image/jpeg', 0.85);
+    };
+    img.src = URL.createObjectURL(f);
+  });
+
+  /* — Adjuntar en una caja .k-suelta: se ve el nombre del archivo elegido — */
+  document.addEventListener('change', function (e) {
+    var inp = e.target;
+    if (!inp.matches || !inp.matches('.k-suelta input[type="file"]')) return;
+    var b = inp.closest('.k-suelta').querySelector('[data-suelta-nombre]');
+    if (b && inp.files && inp.files[0]) b.textContent = inp.files[0].name;
+  });
+
+  /* — Vistas dentro de la misma página: [data-vistas] agrupa, a[data-vista]
+       elige y [data-vista-panel="a b"] dice en qué vistas se ve cada pieza.
+       Pendientes/Hechos, Tablero/Contactos y los filtros de Finanzas ya
+       vienen todos en la página: cambiar es mostrar y esconder, al instante
+       y sin pedir nada al servidor. El enlace sigue siendo un enlace (?ver=,
+       ?modo=): la dirección se actualiza para que recargar o compartir caiga
+       en la misma vista, y sin guion funciona como antes. — */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-vista]');
+    if (!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var grupo = a.closest('[data-vistas]');
+    if (!grupo) return;
+    e.preventDefault();
+    var v = a.getAttribute('data-vista');
+    // Solo lo de este grupo: un grupo dentro de otro (los filtros de Dinero
+    // dentro de Ventas) se maneja solo.
+    var mio = function (el) { return el.parentElement.closest('[data-vistas]') === grupo || el.closest('[data-vistas]') === grupo; };
+    grupo.querySelectorAll('a[data-vista]').forEach(function (x) {
+      if (x.closest('[data-vistas]') !== grupo) return;
+      if (x.getAttribute('data-vista') === v) x.setAttribute('aria-current', 'page');
+      else x.removeAttribute('aria-current');
+    });
+    grupo.querySelectorAll('[data-vista-panel]').forEach(function (p) {
+      if (!mio(p)) return;
+      p.hidden = p.getAttribute('data-vista-panel').split(' ').indexOf(v) < 0;
+    });
+    try { history.replaceState(history.state, '', a.href); } catch (err) {}
+  });
+
+  /* — Ordenar sin recargar: [data-orden-grupo] agrupa, [data-ordenar="clave"]
+       ordena de mayor a menor los hijos de [data-ordenable] por su
+       atributo data-k-clave. (Publicaciones de Instagram: recientes, más
+       alcance, más interacción.) — */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-ordenar]');
+    if (!a) return;
+    var g = a.closest('[data-orden-grupo]');
+    var caja = g && g.querySelector('[data-ordenable]');
+    if (!caja) return;
+    e.preventDefault();
+    var k = 'data-k-' + a.getAttribute('data-ordenar');
+    var num = function (el) { var v = parseFloat(el.getAttribute(k)); return isNaN(v) ? -1 : v; };
+    Array.prototype.slice.call(caja.children)
+      .sort(function (x, y) { return num(y) - num(x); })
+      .forEach(function (c) { caja.appendChild(c); });
+    g.querySelectorAll('[data-ordenar]').forEach(function (x) {
+      if (x === a) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current');
+    });
+    caja.scrollIntoView({ block: 'nearest' });
+  });
+
+  /* — Buscar mientras se escribe: form[data-filtra="selector de filas"] —
+       Las filas ya están en la página; se esconden las que no coinciden
+       (sin mayúsculas ni tildes). Enter no recarga: ya está filtrado. — */
+  function sinTildes(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function filtrar(f) {
+    var caja = f.closest('section, details, .os-card') || document;
+    var inp = f.querySelector('input[type="search"]');
+    var q = sinTildes((inp && inp.value || '').trim());
+    var n = 0;
+    caja.querySelectorAll(f.getAttribute('data-filtra')).forEach(function (fila) {
+      var ve = q === '' || sinTildes(fila.textContent).indexOf(q) >= 0;
+      fila.hidden = !ve;
+      if (ve) n++;
+    });
+    var cuenta = caja.querySelector('[data-filtra-n]');
+    if (cuenta) cuenta.textContent = n;
+    var vacio = caja.querySelector('[data-filtra-vacio]');
+    if (vacio) vacio.hidden = n > 0;
+  }
+  document.addEventListener('input', function (e) {
+    var f = e.target.form;
+    if (f && f.hasAttribute('data-filtra')) filtrar(f);
+  });
+  document.addEventListener('submit', function (e) {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-filtra')) { e.preventDefault(); filtrar(e.target); }
+  });
+
+  /* — Marcar un seguimiento como hecho, al momento: form[data-al-momento] —
+       Antes era un POST con recarga entera: un segundo de espera y la agenda
+       volvía arriba del todo, justo cuando se estaba repasando la lista. Ahora
+       la fila se va en el acto y el guardado viaja por detrás. Si el servidor
+       no confirma, se recarga la página para enseñar lo que de verdad quedó. */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f.matches || !f.matches('form[data-al-momento]') || !window.fetch) return;
+    e.preventDefault();
+    fetch(f.getAttribute('action') || location.href, {
+      method: 'POST', body: new FormData(f), credentials: 'same-origin', redirect: 'manual'
+    }).then(function (r) {
+      if (!(r.type === 'opaqueredirect' || r.ok)) throw new Error('no guardó');
+    }).catch(function () { location.reload(); });
+
+    var fila = f.closest('.os-tarea, .k-fila');
+    if (!fila) return;
+    var grupo = fila.closest('.os-grupo-t, .k-grupo');
+    var panel = fila.closest('[data-vista-panel]');
+    var urgente = grupo && /--(vencidas|hoy)\b/.test(grupo.className);
+    fila.classList.add('os-saliendo', 'saliendo');
+    setTimeout(function () {
+      fila.remove();
+      if (grupo) {
+        var quedan = grupo.querySelectorAll('.os-tarea, .k-fila').length;
+        var cab = grupo.querySelector('.os-grupo-t-cab, .k-grupo-cab');
+        if (!quedan) grupo.remove();
+        else if (cab && cab.lastChild) cab.lastChild.nodeValue = ' · ' + quedan;
+      }
+      if (panel) {
+        var total = panel.querySelectorAll('.os-tarea:not(.os-recordatorio), .k-fila').length;
+        var n = document.querySelector('#agenda [data-vista-panel="' + panel.getAttribute('data-vista-panel') + '"]:is(.n, .k-n)');
+        if (n) n.textContent = total;
+        if (!total) {
+          var p = document.createElement('p');
+          p.className = 'os-al-dia k-vacio';
+          p.textContent = 'Todo al día.';
+          panel.appendChild(p);
+        }
+      }
+      // El aviso de la barra de íconos: seguimientos de hoy o atrasados.
+      var aviso = urgente && document.querySelector('.k-badge-hoy');
+      if (aviso) {
+        var k = parseInt(aviso.textContent, 10) - 1;
+        if (k > 0) aviso.textContent = k; else aviso.remove();
+      }
+    }, 280);
+  });
+
+  /* — Formularios que tardan (conectar o leer Instagram): el botón dice que
+       está trabajando y no se puede pulsar dos veces. Sin esto el clic no
+       daba ninguna señal durante 10-15 s y parecía que no hacía nada. — */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f.matches || !f.matches('form[data-esperando]')) return;
+    var b = f.querySelector('button[type="submit"], button:not([type])');
+    if (!b) return;
+    if (b.disabled) { e.preventDefault(); return; }
+    var et = b.querySelector('span') || b;
+    et.textContent = f.getAttribute('data-esperando');
+    setTimeout(function () { b.disabled = true; }, 0);
+  });
+
+  /* — Copiar al portapapeles: [data-copia="texto"] — */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copia-os]');
+    if (!b) return;
+    var txt = b.getAttribute('data-copia-os');
+    var et = b.querySelector('span');
+    var antes = et ? et.textContent : '';
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject())
+      .then(function () { if (et) et.textContent = 'Copiado'; })
+      .catch(function () { if (et) et.textContent = 'No se pudo copiar'; })
+      .finally(function () { setTimeout(function () { if (et) et.textContent = antes; }, 1800); });
+  });
+
+  /* — Tablero: arrastrar un trato a otra columna lo mueve de etapa —
+     No llama a ninguna API nueva: pone la etapa en el desplegable de la
+     propia tarjeta y envía su formulario, que es lo mismo que haría la
+     persona a mano. Si algo falla, falla igual que el desplegable. */
+  /* (Piel nueva, 2026-10-19: .k-kanban / .k-col / .k-trato, en k-ventas.css.) */
+  var tablero = document.querySelector('.k-v-ventas .k-kanban');
+  if (tablero) {
+    var arrastrado = null;
+    tablero.addEventListener('dragstart', function (e) {
+      var t = e.target.closest('.k-trato');
+      if (!t) return;
+      arrastrado = t;
+      t.classList.add('arrastrando');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', t.dataset.id || '');
+    });
+    tablero.addEventListener('dragend', function () {
+      if (arrastrado) arrastrado.classList.remove('arrastrando');
+      arrastrado = null;
+      tablero.querySelectorAll('.destino').forEach(function (c) { c.classList.remove('destino'); });
+    });
+    tablero.addEventListener('dragover', function (e) {
+      var col = e.target.closest('.k-col');
+      if (!col || !arrastrado) return;
+      e.preventDefault();
+      tablero.querySelectorAll('.destino').forEach(function (c) { if (c !== col) c.classList.remove('destino'); });
+      col.classList.add('destino');
+    });
+    tablero.addEventListener('drop', function (e) {
+      var col = e.target.closest('.k-col');
+      if (!col || !arrastrado) return;
+      e.preventDefault();
+      var etapa = col.dataset.etapa;
+      var sel = arrastrado.querySelector('select[name="nueva_etapa"]');
+      if (!sel || sel.value === etapa) return;
+      var lista = col.querySelector('.k-col-lista');
+      var vacia = lista.querySelector('.k-vacia');
+      if (vacia) vacia.remove();
+      lista.appendChild(arrastrado);
+      sel.value = etapa;
+      sel.form.submit();
+    });
+  }
+
+  /* — Lista de verificación del lanzamiento: se recuerda en este navegador —
+     Es una ayuda de memoria personal, no un registro del equipo; por eso
+     vive en localStorage y no en la base de datos. */
+  document.querySelectorAll('[data-check-id]').forEach(function (c) {
+    var k = 'kvos-check-' + c.getAttribute('data-check-id');
+    try { c.checked = localStorage.getItem(k) === '1'; } catch (err) {}
+    c.addEventListener('change', function () {
+      try { localStorage.setItem(k, c.checked ? '1' : '0'); } catch (err) {}
+      contarFases();
+    });
+  });
+  function contarFases() {
+    document.querySelectorAll('[data-fase]').forEach(function (f) {
+      var t = f.querySelectorAll('[data-check-id]').length;
+      var h = f.querySelectorAll('[data-check-id]:checked').length;
+      var o = f.querySelector('.os-progreso');
+      if (o) o.textContent = h + ' de ' + t;
+    });
+  }
+  contarFases();
+
+  /* — Avance de "Analizar todos" (Sitios): [data-analisis-red] —
+     El análisis corre en el servidor, en segundo plano. Aquí solo se
+     pregunta cada 4 s cómo va y, al terminar, se recarga para que cada
+     tarjeta traiga su índice nuevo. */
+  var ar = document.querySelector('[data-analisis-red]');
+  if (ar && window.fetch) {
+    var tic = setInterval(function () {
+      fetch('/api/os.php?action=red_estado', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          var e = j && j.estado;
+          if (!e || e.fin) { clearInterval(tic); location.reload(); return; }
+          var h = ar.querySelector('[data-ar-hechos]');
+          var a = ar.querySelector('[data-ar-actual]');
+          var b = ar.querySelector('[data-ar-barra]');
+          if (h) h.textContent = e.hechos;
+          if (a) a.textContent = e.actual || '';
+          if (b && e.total) b.style.width = Math.round(e.hechos / e.total * 100) + '%';
+        })
+        .catch(function () {});
+    }, 4000);
+  }
+})();
+</script>
+
+<div class="asis" id="asis">
+  <button type="button" class="asis-boton" id="asis-boton" aria-expanded="false" aria-controls="asis-caja" title="Pregúntale al robot">
+    <canvas id="asis-robot" width="96" height="96" aria-hidden="true"></canvas>    <span class="asis-nombre">Pregúntale</span>
+  </button>
+  <section class="asis-caja" id="asis-caja" hidden aria-label="Asistente de Kaiva">
+    <div class="asis-charla" id="asis-charla" aria-live="polite">
+      <p class="asis-msj asis-msj--el">¡Hola! Soy el robot de Kaiva 👋 Pregúntame cómo va el estudio. Escribe «ayuda» para ver qué sé.</p>
+    </div>
+    <div class="asis-chips" id="asis-chips"></div>
+    <button type="button" class="asis-telefono" id="asis-telefono">📱 Usarlo en el teléfono</button>
+    <form class="asis-form" id="asis-form">
+      <input type="text" id="asis-texto" maxlength="300" autocomplete="off" placeholder="¿Cómo vamos?" aria-label="Pregunta">
+      <button type="submit">Enviar</button>
+    </form>
+  </section>
+</div>
+<script>
+(function () {
+  var caja = document.getElementById('asis-caja');
+  var boton = document.getElementById('asis-boton');
+  var charla = document.getElementById('asis-charla');
+  var chips = document.getElementById('asis-chips');
+  var form = document.getElementById('asis-form');
+  var campo = document.getElementById('asis-texto');
+  if (!caja) return;
+
+  /* La sesión del panel vence tras 24 min sin actividad aunque la página siga abierta: se avisa en vez de fallar callado. */
+  var VENCIDA = 'Tu sesión del panel venció. Recarga la página (F5) y vuelve a entrar.';
+  function leerRespuesta (r) {
+    if (r.status === 401) { var e = new Error('vencida'); e.vencida = true; throw e; }
+    return r.json();
+  }
+  var robot = function (estado, segundos) { if (window.kvRobot) window.kvRobot.estado(estado, segundos); };
+  /* El robot de la cabecera de Inicio también abre el chat; mientras está
+     abierto, escucha (ondas moradas) y el saludo dice «Te escucho…». */
+  var arriba = Array.prototype.slice.call(document.querySelectorAll('[data-asis-abrir]'));
+  var saludo = document.querySelector('[data-saludo-txt]');
+  var saludoAntes = saludo ? saludo.textContent : '';
+  function abrir (si) {
+    caja.hidden = !si;
+    boton.setAttribute('aria-expanded', si ? 'true' : 'false');
+    arriba.forEach(function (b) { b.setAttribute('aria-expanded', si ? 'true' : 'false'); b.classList.toggle('escucha', si); });
+    if (saludo) saludo.textContent = si ? 'Te escucho…' : saludoAntes;
+    if (si) { campo.focus(); robot('feliz', 1.6); }
+  }
+  campo.addEventListener('input', function () { robot(campo.value ? 'escuchando' : 'neutral'); });
+  boton.addEventListener('click', function () { abrir(caja.hidden); });
+  arriba.forEach(function (b) { b.addEventListener('click', function () { abrir(caja.hidden); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !caja.hidden) abrir(false); });
+
+  function mensaje (texto, quien) {
+    var p = document.createElement('p');
+    p.className = 'asis-msj asis-msj--' + quien;
+    p.textContent = texto;
+    charla.appendChild(p);
+    charla.scrollTop = charla.scrollHeight;
+    return p;
+  }
+
+  function sugerir (lista) {
+    chips.textContent = '';
+    (lista || []).forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = s;
+      b.addEventListener('click', function () { preguntar(s); });
+      chips.appendChild(b);
+    });
+  }
+
+  function preguntar (texto) {
+    texto = (texto || '').trim();
+    if (!texto) return;
+    mensaje(texto, 'yo');
+    var espera = mensaje('…', 'el');
+    robot('pensando');
+    fetch('/api/asistente.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ texto: texto }) })
+      .then(leerRespuesta)
+      .then(function (d) {
+        espera.textContent = d.texto || 'No te entendí.';
+        robot('hablando', Math.min(4, 1 + (d.texto || '').length / 60));
+        sugerir(d.sugerencias);
+        if (d.ir) setTimeout(function () { location.href = '?tab=' + encodeURIComponent(d.ir); }, 500);
+      })
+      .catch(function (e) { espera.textContent = e && e.vencida ? VENCIDA : 'No pude conectarme. Intenta de nuevo.'; robot('sorprendido', 1.5); });
+  }
+
+  form.addEventListener('submit', function (e) { e.preventDefault(); preguntar(campo.value); campo.value = ''; });
+
+  /* — En vivo con el teléfono (voz/sala.py): le manda el mouse y obedece lo que le piden por voz — */
+  var canal = { ws: null, espera: 1000, ultimo: 0, telefono: 0 };
+  function llaveCanal () {
+    try {
+      var g = JSON.parse(localStorage.getItem('kaiva-canal') || 'null');
+      if (g && g.vence > Date.now() + 86400000) return Promise.resolve(g.llave);
+    } catch (e) {}
+    return fetch('/api/robot-llave.php', { method: 'POST', credentials: 'same-origin' }).then(leerRespuesta).then(function (d) {
+      var llave = d.url.split('#k=')[1];
+      try { localStorage.setItem('kaiva-canal', JSON.stringify({ llave: llave, vence: Date.parse(d.vence) })); } catch (e) {}
+      return llave;
+    });
+  }
+  function conectar () {
+    llaveCanal().then(function (llave) {
+      var host = location.hostname === 'localhost' ? 'localhost:8090' : location.host + '/ws';
+      var ws = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + host + '/?rol=panel&k=' + encodeURIComponent(llave));
+      canal.ws = ws;
+      ws.onopen = function () { canal.espera = 1000; };
+      ws.onmessage = function (e) {
+        var m;
+        try { m = JSON.parse(e.data); } catch (x) { return; }
+        if (m.t === 'presencia') {
+          canal.telefono = m.telefono || 0;
+          boton.title = canal.telefono ? 'Pregúntale al robot · el teléfono está conectado' : 'Pregúntale al robot';
+        }
+        if (m.t === 'charla' && m.texto) {   // lo que le dijeron al teléfono también queda en el chat
+          if (m.oido) mensaje(m.oido, 'yo');
+          mensaje('📱 ' + m.texto, 'el');
+          robot('hablando', Math.min(4, 1 + m.texto.length / 60));
+        }
+        if (m.t === 'ir' && /^[a-z]+$/.test(m.tab || '')) {
+          robot('feliz', 1.2);
+          var u = new URL(location.href);
+          u.searchParams.set('tab', m.tab);
+          setTimeout(function () { location.href = u.toString(); }, 600);
+        }
+      };
+      ws.onclose = function (e) {
+        canal.ws = null;
+        if (e.code === 4401) { try { localStorage.removeItem('kaiva-canal'); } catch (x) {} }
+        setTimeout(conectar, canal.espera);
+        canal.espera = Math.min(30000, canal.espera * 2);
+      };
+    }).catch(function () { setTimeout(conectar, 30000); });
+  }
+  document.addEventListener('mousemove', function (e) {
+    var ahora = Date.now();
+    if (!canal.ws || canal.ws.readyState !== 1 || !canal.telefono || ahora - canal.ultimo < 60) return;
+    canal.ultimo = ahora;
+    canal.ws.send(JSON.stringify({ t: 'cursor', x: +(e.clientX / innerWidth).toFixed(3), y: +(e.clientY / innerHeight).toFixed(3) }));
+  });
+  conectar();
+
+  /* — El robot en el teléfono: un QR con una llave que sólo sirve para preguntarle (src/robot-llave.php) — */
+  document.getElementById('asis-telefono').addEventListener('click', function () {
+    var aviso = mensaje('Preparando el código…', 'el');
+    var cargarQR = window.qrcode ? Promise.resolve() : new Promise(function (ok, mal) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+      s.onload = ok; s.onerror = mal;
+      document.head.appendChild(s);
+    });
+    Promise.all([cargarQR, fetch('/api/robot-llave.php', { method: 'POST', credentials: 'same-origin' }).then(leerRespuesta)])
+      .then(function (res) {
+        var d = res[1];
+        var qr = window.qrcode(0, 'M');
+        qr.addData(d.url);
+        qr.make();
+        aviso.textContent = 'Escanéalo con la cámara del teléfono y ponlo acostado debajo del monitor. Ahí puedes hablarle o escribirle. El enlace vale hasta el ' + d.vence + '.';
+        var cuadro = document.createElement('div');
+        cuadro.className = 'asis-qr';
+        cuadro.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2, scalable: true });
+        charla.appendChild(cuadro);
+        charla.scrollTop = charla.scrollHeight;
+        robot('entusiasmado', 2);
+      })
+      .catch(function (e) { aviso.textContent = e && e.vencida ? VENCIDA : 'No pude crear el código. Intenta de nuevo.'; robot('sorprendido', 1.5); });
+  });
+  sugerir(['¿Cómo vamos?', '¿Qué hay para hoy?', '¿Qué falta por cobrar?', '¿Cómo van los proyectos?']);
+})();
+</script>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  } }
+</script>
+<script type="module" src="robot/asistente.js"></script>
+            
+                  </main>
+    </div>
+  </div>
+  <script>
+    /* El dominio de este panel. Había tres llamadas a ejecutarAnalisis(): dos
+       pasándole el dominio y una sin ningún argumento, que mandaba
+       `url: undefined` al backend y volvía con un error de validación dentro
+       de un alert(). Ahora el dominio lo sabe el guion. */
+    var KV_DOMINIO = "sonriedental.co";
+  </script>
+  <script src="assets/panel.js"></script>
+  <script src="assets/k-vida.js" defer></script>
+<script>
+/* Vista previa: aquí nada se guarda. */
+document.addEventListener('submit', function (e) { e.preventDefault(); e.stopImmediatePropagation(); }, true);
+</script>
+</body>
+
+</html>
