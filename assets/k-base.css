@@ -956,3 +956,22 @@ body.kv-os .k-contenido.panel { max-width: none; }
 .k-cifra-et { font-size: 12.5px; font-weight: 500; color: #6E6E76; }
 .k-t { padding: 20px; border-radius: 20px; }
 @media (max-width: 760px) { .k-h1 { font-size: 24px; } }
+
+/* La gráfica diaria simple (kv_grafica_diaria, 2026-10-19): una línea, su área
+   clara, la base y el tope, y una frase arriba. */
+.os-grafica .kvg-area { fill: #F3F3F5; }
+.os-grafica .kvg-media { fill: none; stroke: #080808; stroke-width: 2.5px; stroke-linejoin: round; stroke-linecap: round; }
+.os-grafica .kvg-zona { fill: transparent; }
+.os-grafica .kvg-zona:hover { fill: rgba(78, 30, 134, .06); }
+.os-grafica .kvg-marca circle { stroke: #FFFFFF; stroke-width: 3px; }
+.kvg-resumen { margin: 0 0 10px; font-size: 14px; color: #4E4E55; }
+.kvg-resumen b { color: #080808; font-weight: 600; }
+.kvg-resumen .sube { color: #4E1E86; font-weight: 600; }
+.kvg-resumen .baja { color: #080808; font-weight: 600; }
+
+/* El robot 3D en el cambio de pestaña (2026-10-19): la transición entre páginas
+   toma una «foto» de la página que se va, y el lienzo 3D salía en ella como un
+   cuadro blanco. El robot va aparte en la transición y su foto no se muestra:
+   en la página nueva vuelve a dibujarse solo. */
+#asis-robot { view-transition-name: kv-robot; }
+::view-transition-old(kv-robot), ::view-transition-new(kv-robot) { display: none; }

@@ -26,6 +26,10 @@ async function iniciar (lienzo) {
   }
   ajustar()
   if (window.ResizeObserver) new ResizeObserver(ajustar).observe(lienzo)
+  // Al cambiar de pestaña, el lienzo se esconde antes de que el navegador tome la «foto»
+  // de la transición (si no, sale como un cuadro blanco). La página nueva trae el suyo.
+  addEventListener('pageswap', () => { lienzo.style.visibility = 'hidden' })
+  addEventListener('pageshow', () => { lienzo.style.visibility = '' })
   addEventListener('resize', ajustar)
 
   const escena = new THREE.Scene()

@@ -392,3 +392,26 @@ body.kv-os .k-v-redes .k-tabla { min-width: 0; }
 /* Escala de títulos (2026-10-19) */
 .k-v-redes .k-cifra--red { font-size: 28px; }
 .k-v-redes .k-vacio h3 { font-size: 16px; }
+
+/* Gráfica simple (2026-10-19): sin las rayas punteadas de cada publicación. */
+.k-v-redes .k-graf .os-grafica .kvg-marca line { display: none; }
+.k-v-redes .k-graf .os-grafica .kvg-media { stroke-width: 2.5; }
+
+/* Gráfica de barras (2026-10-19): gris por día; el día con publicación, del color
+   de su red. Al lado, «Lo que publicamos» con los mismos colores. */
+.k-v-redes .k-graf .os-grafica .kvg-barra { fill: #E6E6EA; animation: none; }
+.k-v-redes .k-graf .os-grafica .kvg-barra:hover { fill: #080808; }
+.k-v-redes .k-graf .os-grafica .kvg-barra.pub:hover { opacity: .85; }
+.k-v-redes .k-ley .barra { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #E6E6EA; margin-right: 6px; vertical-align: -1px; }
+.k-v-redes .k-ultimas-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.k-v-redes .k-ultimas-lista li { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 12px; align-items: start; }
+.k-v-redes .k-ultimas-lista i { width: 10px; height: 10px; border-radius: 3px; margin-top: 5px; }
+.k-v-redes .k-ultimas-lista b { display: block; font-size: 14px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-v-redes .k-ultimas-lista small { display: block; margin-top: 2px; font-size: 12.5px; color: #6E6E76; line-height: 1.4; }
+.k-v-redes .k-ultimas-lista .sube { color: #4E1E86; font-weight: 600; }
+.k-v-redes .k-ultimas-lista .baja { color: #080808; font-weight: 600; }
+@media (max-width: 1180px) { .k-v-redes .k-graf-t, .k-v-redes .k-ultimas { grid-column: span 12; } }
+.k-v-redes .k-ultimas-sub { margin: 20px 0 12px; font-size: 14px; font-weight: 600; color: #4E4E55; }
+.k-v-redes .k-ultimas-lista i.hueco { background: transparent; }
+/* Estética redonda: los marcadores de color, círculos. */
+.k-v-redes .k-ley .barra, .k-v-redes .k-ultimas-lista i { border-radius: 50%; }

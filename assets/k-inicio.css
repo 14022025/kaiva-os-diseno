@@ -544,3 +544,5 @@ dialog.k-dlg .k-bit-dlg { font-size: 15px; line-height: 1.6; color: #4E4E55; }
 }
 /* «Ver tu semana» justo debajo del título, no al fondo de la tarjeta. */
 .k-v-inicio .k-heroe-txt { justify-content: flex-start; gap: 18px; }
+/* «Ver tu semana» vuelve abajo de la tarjeta (2026-10-19): la tarjeta queda igual. */
+.k-v-inicio .k-heroe-txt { justify-content: space-between; }
