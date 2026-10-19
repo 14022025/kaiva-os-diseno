@@ -17,12 +17,13 @@
   lienzo.className = 'kp-luz';
   lienzo.setAttribute('aria-hidden', 'true');
   fondo.appendChild(lienzo);
-  // El grano (ver .kp-grano en src/pantalla.php): ruido gris, hecho una vez.
+  // Tramado invisible (ver .kp-grano en src/pantalla.php): varía ±1 tono, no se ve como
+  // grano ni textura (pedido del equipo); solo deshace los escalones del morado oscuro.
   var ruido = document.createElement('canvas');
   ruido.width = ruido.height = 160;
   var gr0 = ruido.getContext('2d'), img = gr0.createImageData(160, 160);
   for (var i = 0; i < img.data.length; i += 4) {
-    var v = 128 + (Math.random() - 0.5) * 70;
+    var v = 128 + Math.round((Math.random() - 0.5) * 10);
     img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255;
   }
   gr0.putImageData(img, 0, 0);
