@@ -345,3 +345,19 @@ body.kv-os .kvr { --kvr-cursor: var(--k-cursor), auto; --kvr-mano: var(--k-curso
 .kvr--previa .kvr-mini { aspect-ratio: 340 / 260; }
 .kvr--previa .kvr-grande { font-size: 58px; }
 .kvr--previa .kvr-grande small { font-size: 20px; }
+
+/* Recap en Inicio (2026-10-19): las pantallas llenan el alto de la tarjeta
+   (antes quedaba un espacio negro abajo) y la gráfica de 7 días vuelve si cabe;
+   recap.js la quita sola cuando no hay lugar. */
+.kvr.kvr--previa { align-items: stretch; }
+.kvr--previa .kvr-mini { aspect-ratio: auto; min-height: 200px; }
+.kvr--previa .kvr-abajo { display: flex !important; }
+.kvr--previa .kvr-abajo[hidden] { display: none !important; }
+.kvr--previa .kvr-hueco { display: block !important; flex: 1 1 auto; }
+/* La gráfica de 7 días, compacta dentro de la vista previa para que quepa. */
+.kvr--previa .kvr-abajo { margin-top: 10px; gap: 8px; }
+.kvr--previa .kvr-caja { padding: 12px 14px 10px; border-radius: 18px; }
+.kvr--previa .kvr-caja-et { display: none; }
+.kvr--previa .kvr-dias { height: 84px; gap: 6px; }
+.kvr--previa .kvr-dias em { font-size: 13px; }
+.kvr--previa .kvr-burbujas { height: 110px; transform: scale(.8); transform-origin: 50% 100%; }

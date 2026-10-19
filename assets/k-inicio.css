@@ -514,3 +514,33 @@ dialog.k-dlg .k-bit-dlg { font-size: 15px; line-height: 1.6; color: #4E4E55; }
   .k-v-inicio .k-dos { flex-direction: column; }
   .k-v-inicio .k-dos > * { flex: none; width: 100%; }
 }
+
+/* ============================================================================
+   CABECERA DE ANTES, MÁS PEQUEÑA Y CON MÁS AIRE (2026-10-19): vuelven la
+   fecha en su círculo, el robot y «Hola. ¿Qué hacemos hoy?» en gris y negro,
+   un escalón por debajo de como era (48 → 38 px, robot 150 → 116 px), con
+   más espacio en blanco arriba y abajo. Pisa lo de la propuesta anterior.
+   ============================================================================ */
+.k-v-inicio .k-banda { padding: 14px 0 22px; gap: 28px; }
+.k-v-inicio .k-dia { gap: 12px; }
+.k-v-inicio .k-fecha { width: 60px; height: 60px; font-size: 22px; }
+.k-v-inicio .k-fecha-txt { font-size: 14px; padding-right: 20px; }
+.k-v-inicio .k-hola { gap: 16px; }
+.k-v-inicio .k-robot { width: 116px; margin: -10px 0; }
+.k-v-inicio .k-robot .k-onda { width: 92px; height: 92px; margin: -46px 0 0 -46px; }
+.k-v-inicio .k-saludo { font-size: clamp(28px, 2.7vw, 38px); line-height: 1.06; letter-spacing: -.045em; }
+.k-v-inicio .k-dos { flex-direction: column; width: 216px; gap: 8px; }
+.k-v-inicio .k-dos > * { height: 42px; font-size: 14px; }
+@media (max-width: 1180px) {
+  .k-v-inicio .k-dos { flex-direction: row; width: auto; }
+}
+@media (max-width: 760px) {
+  .k-v-inicio .k-banda { padding: 6px 0 14px; gap: 14px; }
+  .k-v-inicio .k-fecha { width: 52px; height: 52px; font-size: 19px; }
+  .k-v-inicio .k-robot { width: 88px; margin: -8px 0; }
+  .k-v-inicio .k-saludo { font-size: 28px; }
+  .k-v-inicio .k-dos { flex-direction: column; width: 100%; }
+  .k-v-inicio .k-dos > * { flex: 1 1 auto; width: 100%; }
+}
+/* «Ver tu semana» justo debajo del título, no al fondo de la tarjeta. */
+.k-v-inicio .k-heroe-txt { justify-content: flex-start; gap: 18px; }

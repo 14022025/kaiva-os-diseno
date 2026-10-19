@@ -289,9 +289,9 @@
         var sec = m.querySelector('.kvr-p');
         m.style.setProperty('--k', k.toFixed(4));
         sec.style.height = (m.clientHeight / k) + 'px';
-        // Lo que no cabe se quita: primero los textos largos, luego el chip, luego lo de abajo.
+        // Lo que no cabe se quita: primero los textos largos, luego la gráfica de abajo, y el chip al final.
         var quitables = [].slice.call(sec.querySelectorAll('.kvr-texto'))
-          .concat([].slice.call(sec.querySelectorAll('.kvr-chip')), [].slice.call(sec.querySelectorAll('.kvr-abajo')));
+          .concat([].slice.call(sec.querySelectorAll('.kvr-abajo')), [].slice.call(sec.querySelectorAll('.kvr-chip')));
         quitables.forEach(function (x) { x.hidden = false; });
         for (var q = 0; q < quitables.length && sec.scrollHeight > sec.clientHeight + 1; q++) quitables[q].hidden = true;
       });
