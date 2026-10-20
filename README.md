@@ -1,7 +1,5 @@
-# Kaiva OS · panel nuevo (vista previa)
+# Kaiva OS · vista previa (retirada)
 
-Vista previa del diseño del panel de Kaiva OS, para recorrerlo en línea.
-
-- Todos los datos son **de ejemplo**: nombres, cifras, clientes y contactos son ficticios.
-- Es una copia estática: se puede navegar, pero nada se guarda.
-- El código real del panel vive en otro repositorio (privado).
+La vista previa del panel nuevo se retiró el 2026-10-19: los archivos ya no se publican.
+Siguen en el historial de este repositorio por si hacen falta (commit anterior a este).
+El panel real vive en el repositorio privado.
